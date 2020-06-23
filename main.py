@@ -32,7 +32,7 @@ class Rabbit():
 def movement(rabbit: object):
     rabbit_appear(rabbit.pos_X, rabbit.pos_Y)
 
-    if rabbit.steps % 15 is 0:
+    if rabbit.steps % 25 is 0:
         rabbit.direction_randomiser = random.randint(1,4)
 
     rabbit_speed_X_right = random.randint(-99, 199) / 35
@@ -54,14 +54,17 @@ def movement(rabbit: object):
     # Keeping the rabbit within boundaries
     if rabbit.pos_X <= 0:
         rabbit.pos_X = 0
+        rabbit.direction_randomiser = 1
     if rabbit.pos_X >= 850:
         rabbit.pos_X = 850
+        rabbit.direction_randomiser = 2
     if rabbit.pos_Y <= 0:
         rabbit.pos_Y = 0
+        rabbit.direction_randomiser = 3
     if rabbit.pos_Y >= 650:
         rabbit.pos_Y = 650
+        rabbit.direction_randomiser = 4
 
-    print(rabbit.direction_randomiser)
     rabbit.steps += 1
 
 def rabbit_appear(x, y):
