@@ -1,6 +1,7 @@
 import pygame
 import random
 import time
+import math
 
 # Initialize pygame
 
@@ -20,64 +21,96 @@ rabbit_population = []
 
 class Rabbit():
     def __init__(self):
+        self.id = 0
         self.pos_X = 0
         self.pos_Y = 0
         self.age = 0
         self.gender = ''
         self.isAlive = True
         self.steps = 0
-        self.direction_randomiser = 0
+        self.random_speed = 0
+        self.random_degree = 0
 
 
-def movement(rabbit: object):
-    rabbit_appear(rabbit.pos_X, rabbit.pos_Y)
+def live(rabbit : object):
 
-    if rabbit.steps % 25 is 0:
-        rabbit.direction_randomiser = random.randint(1,4)
+    # Rabbit appears
+    rabbit_appear(rabbit.pos_X,rabbit.pos_Y)
 
-    rabbit_speed_X_right = random.randint(-99, 199) / 35
-    rabbit_speed_X_left = random.randint(-199, 99) / 35
-    rabbit_speed_Y_top = random.randint(-199, 99) / 35
-    rabbit_speed_Y_bottom = random.randint(-99, 199) / 35
+    #Gender marker
+    pygame.draw.circle(screen, (255, 47, 154) if rabbit.gender == 'F' else (
+        51, 171, 249), (int(rabbit.pos_X) + 4, int(rabbit.pos_Y) + 4), 3)
 
-    if rabbit.direction_randomiser == 1:
-        rabbit.pos_X += rabbit_speed_X_right
-    if rabbit.direction_randomiser == 2:
-        rabbit.pos_X += rabbit_speed_X_left
-    if rabbit.direction_randomiser == 3:
-        rabbit.pos_Y += rabbit_speed_Y_bottom
-    if rabbit.direction_randomiser == 4:
-        rabbit.pos_Y += rabbit_speed_Y_top
 
-    # print(rabbit_population[i].gender)
+    # Rabbit Movements
 
-    # Keeping the rabbit within boundaries
-    if rabbit.pos_X <= 0:
-        rabbit.pos_X = 0
-        rabbit.direction_randomiser = 1
-    if rabbit.pos_X >= 850:
-        rabbit.pos_X = 850
-        rabbit.direction_randomiser = 2
-    if rabbit.pos_Y <= 0:
-        rabbit.pos_Y = 0
-        rabbit.direction_randomiser = 3
-    if rabbit.pos_Y >= 650:
-        rabbit.pos_Y = 650
-        rabbit.direction_randomiser = 4
+    #Reverses direction
+    def reverse():
+        if rabbit.random_degree < 180:
+            rabbit.random_degree + 180
+        else:
+            rabbit.random_degree - 180
 
+    # Changes direction after every 30 steps
+    if rabbit.steps % 30 == 0:
+        rabbit.random_degree = random.randint(0,360)
+
+
+    # Changes speed after every 15 steps
+    if rabbit.steps % 15 == 0:
+        rabbit.random_speed = random.randint(-100,100) / 5
+
+    rabbit.pos_X += rabbit.random_speed * math.cos(math.radians(
+        rabbit.random_degree))
+    rabbit.pos_Y += rabbit.random_speed * math.sin(math.radians(
+        rabbit.random_degree))
+
+
+
+    # Keeps the rabbit qithin boundaries
+    if rabbit.pos_X <= 40:
+        rabbit.pos_X = 40
+        reverse()
+
+    if rabbit.pos_X >= 860:
+        rabbit.pos_X = 860
+        reverse()
+
+    if rabbit.pos_Y <= 40:
+        rabbit.pos_Y = 40
+        reverse()
+
+    if rabbit.pos_Y >= 660:
+        rabbit.pos_Y = 660
+        reverse()
+
+
+    #Step counter
     rabbit.steps += 1
+
+    #Age counter
+    rabbit.age += 1
+
 
 def rabbit_appear(x, y):
     screen.blit(rabbit_icon, (x, y))
 
 
 for i in range(rabbit_initial_N):
-    gender = 'M' if random.randint(0, 1) == 1 else 'F'
+    gender = 'F' if random.randint(0, 10) % 2 == 0 else 'M'
+    # Purposely slightly biased towards generating more females
     rabbit = Rabbit()
+    rabbit.id = i
     rabbit.pos_X = random.randint(30, 870)
     rabbit.pos_Y = random.randint(30, 670)
     rabbit.gender = gender
     rabbit_population.append(rabbit)
+
+
+def print_stats():
+    for rabbit in rabbit_population:
+        print(rabbit.id,rabbit.age, rabbit.steps, rabbit.gender, len(rabbit_population))
+
 
 # Game_Loop
 
@@ -88,11 +121,14 @@ while game_running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            print_stats()
             game_running = False
+
 
     # Rabbit appears at a random space
     for i in range(len(rabbit_population)):
-        movement(rabbit_population[i])
+        if rabbit_population[i].isAlive:
+            live(rabbit_population[i])
 
     time.sleep(0.2)
 
