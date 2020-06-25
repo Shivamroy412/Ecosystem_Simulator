@@ -18,7 +18,7 @@ pygame.display.set_caption("Ecosystem Simulator")
 rabbit_image = pygame.image.load("./img/rabbit.png")
 grass_image = pygame.image.load("./img/grass.png")
 rabbit_initial_N = 10
-grass_quantity = 15
+grass_quantity = 30
 rabbit_population = []
 grass_list = []
 days = 0
@@ -35,6 +35,7 @@ class Rabbit():
         self.steps = 0
         self.random_speed = 0
         self.random_degree = 0
+        self.hunger = 0
 
     def live(rabbit: object):
         # Rabbit appears
@@ -42,7 +43,14 @@ class Rabbit():
 
         # Gender marker
         pygame.draw.circle(screen, (255, 47, 154) if rabbit.gender == 'F' else (
-            51, 171, 249), (int(rabbit.pos_X) + 4, int(rabbit.pos_Y) + 4), 3)
+            51, 171, 249), (int(rabbit.pos_X) + 7, int(rabbit.pos_Y) + 6), 3)
+
+        # Hunger marker
+        pygame.draw.rect(screen, ( 57,255,20, 0.3), (rabbit.pos_X,
+        rabbit.pos_Y - 5, 32, 3),0)
+
+        pygame.draw.rect(screen, (255, 75, 0, 0.3), (rabbit.pos_X,
+        rabbit.pos_Y - 5, (32 / 100) * rabbit.hunger,3), 0)
 
         # Rabbit Movements
 
@@ -89,9 +97,17 @@ class Rabbit():
         # Age counter
         rabbit.age += 1
 
-        eaten_grass = isCollided(rabbit, grass_list)
-        if eaten_grass:
-            eaten_grass.isAlive = False
+        # Hunger Counter
+        rabbit.hunger += 0.5
+        if rabbit.hunger >= 100:
+            rabbit.isAlive = False
+
+        # Rabbit eats only when hungry
+        if rabbit.hunger > 50:
+            eaten_grass = isCollided(rabbit, grass_list)
+            if eaten_grass:
+                eaten_grass.isAlive = False
+                rabbit.hunger = 0
 
 
 for i in range(rabbit_initial_N):
@@ -136,10 +152,11 @@ for i in range(grass_quantity):
 # Collision function
 def isCollided(object1: object, object2_list: list):
     for object2 in object2_list:
-        distance = math.sqrt((object1.pos_X - object2.pos_X) ** 2 + (
-                object1.pos_Y - object2.pos_Y) ** 2)
-        if distance < 40 and distance > 0:
-            return object2
+        if object2.isAlive:
+            distance = math.sqrt((object1.pos_X - object2.pos_X) ** 2 + (
+                    object1.pos_Y - object2.pos_Y) ** 2)
+            if 40 > distance > 0:
+                return object2
 
 
 # Object visible in screen
@@ -177,9 +194,9 @@ while game_running:
 
     # Grass generation every 15 days
 
-    if days % 25 == 0:
+    if days % 50 == 0:
         old_grass_quantity = grass_quantity
-        new_grass_quantity = old_grass_quantity + random.randint(1, 5)
+        new_grass_quantity = old_grass_quantity + random.randint(5, 30)
         new_grass(old_grass_quantity, new_grass_quantity)
         grass_quantity = new_grass_quantity
 
