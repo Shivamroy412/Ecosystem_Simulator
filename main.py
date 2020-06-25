@@ -14,10 +14,13 @@ pygame.display.set_caption("Ecosystem Simulator")
 
 # Rabbit
 
-rabbit_icon = pygame.image.load("./img/rabbit.png")
+rabbit_image = pygame.image.load("./img/rabbit.png")
+grass_image = pygame.image.load("./img/grass.png")
 rabbit_initial_N = 5
+grass_quantity = 15
 rabbit_population = []
-
+grass_list = []
+days = 0
 
 class Rabbit():
     def __init__(self):
@@ -32,72 +35,64 @@ class Rabbit():
         self.random_degree = 0
 
 
-def live(rabbit : object):
 
-    # Rabbit appears
-    rabbit_appear(rabbit.pos_X,rabbit.pos_Y)
+    def live(rabbit: object):
+        # Rabbit appears
+        object_appear(rabbit_image,rabbit.pos_X, rabbit.pos_Y)
 
-    #Gender marker
-    pygame.draw.circle(screen, (255, 47, 154) if rabbit.gender == 'F' else (
-        51, 171, 249), (int(rabbit.pos_X) + 4, int(rabbit.pos_Y) + 4), 3)
+        # Gender marker
+        pygame.draw.circle(screen, (255, 47, 154) if rabbit.gender == 'F' else (
+            51, 171, 249), (int(rabbit.pos_X) + 4, int(rabbit.pos_Y) + 4), 3)
 
+        # Rabbit Movements
 
-    # Rabbit Movements
+        # Reverses direction
+        def reverse():
+            if rabbit.random_degree < 180:
+                rabbit.random_degree += 180
+            else:
+                rabbit.random_degree -= 180
 
-    #Reverses direction
-    def reverse():
-        if rabbit.random_degree < 180:
-            rabbit.random_degree + 180
-        else:
-            rabbit.random_degree - 180
+        # Changes direction after every 30 steps
+        if rabbit.steps % 30 == 0:
+            rabbit.random_degree = random.randint(0, 360)
 
-    # Changes direction after every 30 steps
-    if rabbit.steps % 30 == 0:
-        rabbit.random_degree = random.randint(0,360)
+        # Changes speed after every 15 steps
+        if rabbit.steps % 15 == 0:
+            rabbit.random_speed = random.randint(-100, 100) / 15
 
+        rabbit.pos_X += rabbit.random_speed * math.cos(math.radians(
+            rabbit.random_degree))
+        rabbit.pos_Y += rabbit.random_speed * math.sin(math.radians(
+            rabbit.random_degree))
 
-    # Changes speed after every 15 steps
-    if rabbit.steps % 15 == 0:
-        rabbit.random_speed = random.randint(-100,100) / 5
+        # Keeps the rabbit qithin boundaries
+        if rabbit.pos_X <= 40:
+            rabbit.pos_X = 40
+            reverse()
 
-    rabbit.pos_X += rabbit.random_speed * math.cos(math.radians(
-        rabbit.random_degree))
-    rabbit.pos_Y += rabbit.random_speed * math.sin(math.radians(
-        rabbit.random_degree))
+        if rabbit.pos_X >= 860:
+            rabbit.pos_X = 860
+            reverse()
 
+        if rabbit.pos_Y <= 40:
+            rabbit.pos_Y = 40
+            reverse()
 
+        if rabbit.pos_Y >= 660:
+            rabbit.pos_Y = 660
+            reverse()
 
-    # Keeps the rabbit qithin boundaries
-    if rabbit.pos_X <= 40:
-        rabbit.pos_X = 40
-        reverse()
+        # Step counter
+        rabbit.steps += 1
 
-    if rabbit.pos_X >= 860:
-        rabbit.pos_X = 860
-        reverse()
+        # Age counter
+        rabbit.age += 1
 
-    if rabbit.pos_Y <= 40:
-        rabbit.pos_Y = 40
-        reverse()
-
-    if rabbit.pos_Y >= 660:
-        rabbit.pos_Y = 660
-        reverse()
-
-
-    #Step counter
-    rabbit.steps += 1
-
-    #Age counter
-    rabbit.age += 1
-
-
-def rabbit_appear(x, y):
-    screen.blit(rabbit_icon, (x, y))
 
 
 for i in range(rabbit_initial_N):
-    gender = 'F' if random.randint(0, 10) % 2 == 0 else 'M'
+    gender = 'F' if random.randint(0, 12) % 2 == 0 else 'M'
     # Purposely slightly biased towards generating more females
     rabbit = Rabbit()
     rabbit.id = i
@@ -107,14 +102,48 @@ for i in range(rabbit_initial_N):
     rabbit_population.append(rabbit)
 
 
+
+# Grass
+class Grass():
+    def __init__(self):
+        self.id =  0
+        self.pos_X = 0
+        self.pos_Y = 0
+
+    def populate_grass(grass: object):
+        object_appear(grass_image, grass.pos_X,grass.pos_Y)
+
+
+def new_grass(old, new):
+    for i in range(old,new):
+        grass = Grass()
+        grass.pos_X = random.randint(10, 890)
+        grass.pos_Y = random.randint(10,690)
+        grass_list.append(grass)
+
+# Initial grass generation
+for i in range(grass_quantity):
+    grass = Grass()
+    grass.pos_X = random.randint(10, 890)
+    grass.pos_Y = random.randint(10,690)
+    grass_list.append(grass)
+
+# Object visible in screen
+def object_appear(image, x, y):
+    screen.blit(image, (x, y))
+
+
+# Stats
 def print_stats():
     for rabbit in rabbit_population:
-        print(rabbit.id,rabbit.age, rabbit.steps, rabbit.gender, len(rabbit_population))
+        print(rabbit.id, rabbit.age, rabbit.steps, rabbit.gender,
+              len(rabbit_population))
 
 
 # Game_Loop
 
 game_running = True
+
 while game_running:
 
     screen.fill((11, 102, 35))  # Color of grass
@@ -124,11 +153,27 @@ while game_running:
             print_stats()
             game_running = False
 
-
     # Rabbit appears at a random space
     for i in range(len(rabbit_population)):
         if rabbit_population[i].isAlive:
-            live(rabbit_population[i])
+            Rabbit.live(rabbit_population[i])
+    for i in range(len(grass_list)):
+        Grass.populate_grass(grass_list[i])
+
+
+    # Grass generation every 15 days
+
+    if days % 15 == 0:
+        old_grass_quantity = grass_quantity
+        new_grass_quantity = old_grass_quantity + random.randint(1,5)
+        new_grass(old_grass_quantity, new_grass_quantity)
+        grass_quantity = new_grass_quantity
+
+
+
+    #Days counter
+    days += 1
+
 
     time.sleep(0.2)
 
