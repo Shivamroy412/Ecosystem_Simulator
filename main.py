@@ -4,21 +4,22 @@ import time
 import math
 
 # Initialize pygame
-
 pygame.init()
 
 # Game Screen
-
-screen_width, screen_height = 1200, 800
+screen_width, screen_height = 1200, 780
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Ecosystem Simulator")
 
 # Rabbit
+rabbit_image = [pygame.image.load("./img/rabbit_walk/rabbit" + str(i) +
+                                  ".png") for i in range(1,4)]
+rabbit_image_quad1 = [pygame.image.load("./img/rabbit_walk/right_rabbit" + str(
+    i) + ".png") for i in range(1,4)]
 
-rabbit_image = pygame.image.load("./img/rabbit.png")
 grass_image = pygame.image.load("./img/grass.png")
 rabbit_initial_N = 10
-grass_quantity = 30
+grass_quantity = 130
 rabbit_population = []
 grass_list = []
 days = 0
@@ -33,24 +34,43 @@ class Rabbit():
         self.gender = ''
         self.isAlive = True
         self.steps = 0
-        self.random_speed = 0
+        self.random_speed = 3
         self.random_degree = 0
         self.hunger = 0
+        self.isPregnant = False
 
     def live(rabbit: object):
         # Rabbit appears
-        object_appear(rabbit_image, rabbit.pos_X, rabbit.pos_Y)
+        if 90 < rabbit.random_degree <= 180:
+            object_appear(pygame.transform.rotate(rabbit_image[rabbit.steps
+                                                               %3], 10),
+                rabbit.pos_X, rabbit.pos_Y)
+
+        elif 180 < rabbit.random_degree <= 270:
+            object_appear(pygame.transform.rotate(rabbit_image[rabbit.steps
+                                                               %3], -10),
+                rabbit.pos_X,rabbit.pos_Y)
+
+        elif 0 < rabbit.random_degree <= 90:
+            object_appear(pygame.transform.rotate(rabbit_image_quad1[
+                                                      rabbit.steps % 3],-10),
+                  rabbit.pos_X,rabbit.pos_Y)
+
+        else:
+            object_appear(pygame.transform.rotate(rabbit_image_quad1[
+                                                      rabbit.steps % 3],10),
+                  rabbit.pos_X,rabbit.pos_Y)
 
         # Gender marker
         pygame.draw.circle(screen, (255, 47, 154) if rabbit.gender == 'F' else (
             51, 171, 249), (int(rabbit.pos_X) + 7, int(rabbit.pos_Y) + 6), 3)
 
         # Hunger marker
-        pygame.draw.rect(screen, ( 57,255,20, 0.3), (rabbit.pos_X,
-        rabbit.pos_Y - 5, 32, 3),0)
-
-        pygame.draw.rect(screen, (255, 75, 0, 0.3), (rabbit.pos_X,
-        rabbit.pos_Y - 5, (32 / 100) * rabbit.hunger,3), 0)
+        # pygame.draw.rect(screen, ( 57,255,20, 0.3), (rabbit.pos_X,
+        # rabbit.pos_Y - 5, 32, 3),0)  #Base
+        #
+        # pygame.draw.rect(screen, (255, 75, 0, 0.3), (rabbit.pos_X,
+        # rabbit.pos_Y - 5, (40 / 100) * rabbit.hunger,3), 0) #Marker
 
         # Rabbit Movements
 
@@ -64,10 +84,6 @@ class Rabbit():
         # Changes direction after every 30 steps
         if rabbit.steps % 30 == 0:
             rabbit.random_degree = random.randint(0, 360)
-
-        # Changes speed after every 15 steps
-        if rabbit.steps % 15 == 0:
-            rabbit.random_speed = random.randint(-100, 100) / 15
 
         rabbit.pos_X += rabbit.random_speed * math.cos(math.radians(
             rabbit.random_degree))
@@ -109,6 +125,14 @@ class Rabbit():
                 eaten_grass.isAlive = False
                 rabbit.hunger = 0
 
+        # Reproduction
+        if rabbit.gender == 'M':
+            mother = isCollided(rabbit, list(filter(lambda female: (
+                    female.gender == 'F' and not female.isPregnant),rabbit_population)))
+            if mother:
+                mother.isPregnant = True
+                print(mother.gender, mother.id)
+
 
 for i in range(rabbit_initial_N):
     gender = 'F' if random.randint(0, 12) % 2 == 0 else 'M'
@@ -124,7 +148,6 @@ for i in range(rabbit_initial_N):
 # Grass
 class Grass():
     def __init__(self):
-        self.id = 0
         self.pos_X = 0
         self.pos_Y = 0
         self.isAlive = True
@@ -164,11 +187,18 @@ def object_appear(image, x, y):
     screen.blit(image, (x, y))
 
 
+# def rabbit_appear(rabbit: object):
+#     image = pygame.image.load("./img/rabbit_walk/rabbit" + str(image_index) + ".png")
+#     screen.blit(image, (rabbit.pos_X, rabbit.pos_Y))
+#     image_index += 1
+#     if image_index == 4:
+#         image_index = 1
+
+
 # Stats
 def print_stats():
     for rabbit in rabbit_population:
-        print(rabbit.id, rabbit.age, rabbit.steps, rabbit.gender,
-              len(rabbit_population))
+        print(rabbit.id, rabbit.age, rabbit.steps, rabbit.gender)
 
 
 # Game_Loop
@@ -184,19 +214,22 @@ while game_running:
             print_stats()
             game_running = False
 
+
+    # Grass appears at a random space
+    for i in range(len(grass_list)):
+        if grass_list[i].isAlive:
+            Grass.populate_grass(grass_list[i])
     # Rabbit appears at a random space
     for i in range(len(rabbit_population)):
         if rabbit_population[i].isAlive:
             Rabbit.live(rabbit_population[i])
-    for i in range(len(grass_list)):
-        if grass_list[i].isAlive:
-            Grass.populate_grass(grass_list[i])
+
 
     # Grass generation every 15 days
 
     if days % 50 == 0:
         old_grass_quantity = grass_quantity
-        new_grass_quantity = old_grass_quantity + random.randint(5, 30)
+        new_grass_quantity = old_grass_quantity + random.randint(0, 10)
         new_grass(old_grass_quantity, new_grass_quantity)
         grass_quantity = new_grass_quantity
 
