@@ -11,6 +11,8 @@ screen_width, screen_height = 1200, 780
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Ecosystem Simulator")
 
+
+
 # Rabbit
 rabbit_image = [pygame.image.load("./img/rabbit_walk/rabbit" + str(i) +
                                   ".png") for i in range(1,4)]
@@ -23,6 +25,9 @@ grass_quantity = 130
 rabbit_population = []
 grass_list = []
 days = 0
+rabbit_gestation_period = 200 #Also includes the time after birth to avoid
+# inbreeding
+rabbit_childhood = 70
 
 
 class Rabbit():
@@ -38,6 +43,10 @@ class Rabbit():
         self.random_degree = 0
         self.hunger = 0
         self.isPregnant = False
+        self.gestation_days = 0
+        self.isAdult = False
+        self.life_span = 300
+
 
     def live(rabbit: object):
         # Rabbit appears
@@ -126,26 +135,53 @@ class Rabbit():
                 rabbit.hunger = 0
 
         # Reproduction
-        if rabbit.gender == 'M':
+        if rabbit.gender == 'M' and rabbit.isAdult:
             mother = isCollided(rabbit, list(filter(lambda female: (
-                    female.gender == 'F' and not female.isPregnant),rabbit_population)))
+                    (female.gender == 'F' and not female.isPregnant) and
+                    rabbit.isAdult),rabbit_population)))
             if mother:
                 mother.isPregnant = True
                 print(mother.gender, mother.id)
 
+        if rabbit.isPregnant:
+            rabbit.gestation_days += 1
 
-for i in range(rabbit_initial_N):
-    gender = 'F' if random.randint(0, 12) % 2 == 0 else 'M'
-    # Purposely slightly biased towards generating more females
-    rabbit = Rabbit()
-    rabbit.id = i
-    rabbit.pos_X = random.randint(30, screen_width - 30)
-    rabbit.pos_Y = random.randint(30, screen_height - 30)
-    rabbit.gender = gender
-    rabbit_population.append(rabbit)
+        if rabbit.isPregnant and rabbit.gestation_days == \
+                rabbit_gestation_period/2:
+            litter_size = random.randint(5,10)
+            rabbit_birth(litter_size)
+
+        if rabbit.gestation_days == rabbit_gestation_period:
+            rabbit.isPregnant = False
+            rabbit.gestation_days = 0
 
 
-# Grass
+        #Rabbit Death
+
+        if rabbit.age > rabbit_childhood:
+            rabbit.isAdult = True
+        if rabbit.age == rabbit.life_span:
+            rabbit.isAlive = False
+
+
+
+#Rabbit birth
+def rabbit_birth(rabbit_quantity):
+    print("birth")
+    for i in range(rabbit_quantity):
+        gender = 'F' if random.randint(0, 16) % 2 == 0 else 'M'
+        # Purposely slightly biased towards generating more females
+        rabbit = Rabbit()
+        rabbit.id = i + len(rabbit_population)
+        rabbit.pos_X = random.randint(30, screen_width - 30)
+        rabbit.pos_Y = random.randint(30, screen_height - 30)
+        rabbit.gender = gender
+        rabbit.life_span = random.randint(100,400)
+        rabbit_population.append(rabbit)
+
+
+
+#Grass
 class Grass():
     def __init__(self):
         self.pos_X = 0
@@ -156,12 +192,14 @@ class Grass():
         object_appear(grass_image, grass.pos_X, grass.pos_Y)
 
 
-def new_grass(old, new):
-    for i in range(old, new):
+def new_grass(new):
+    for i in range(new):
         grass = Grass()
         grass.pos_X = random.randint(10, screen_width - 10)
         grass.pos_Y = random.randint(10, screen_height - 10)
         grass_list.append(grass)
+
+
 
 
 # Initial grass generation
@@ -220,6 +258,8 @@ while game_running:
         if grass_list[i].isAlive:
             Grass.populate_grass(grass_list[i])
     # Rabbit appears at a random space
+    if days == 0:
+        rabbit_birth(rabbit_initial_N)
     for i in range(len(rabbit_population)):
         if rabbit_population[i].isAlive:
             Rabbit.live(rabbit_population[i])
@@ -228,10 +268,8 @@ while game_running:
     # Grass generation every 15 days
 
     if days % 50 == 0:
-        old_grass_quantity = grass_quantity
-        new_grass_quantity = old_grass_quantity + random.randint(0, 10)
-        new_grass(old_grass_quantity, new_grass_quantity)
-        grass_quantity = new_grass_quantity
+        new_grass_quantity = random.randint(10,15)
+        new_grass(new_grass_quantity)
 
     # Days counter
     days += 1
