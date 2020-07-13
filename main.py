@@ -2,32 +2,16 @@ import pygame
 import random
 import time
 import math
+import config
+import statistics
 
 # Initialize pygame
 pygame.init()
 
 # Game Screen
-screen_width, screen_height = 1200, 780
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((config.screen_width, config.screen_height))
 pygame.display.set_caption("Ecosystem Simulator")
 
-
-
-# Rabbit
-rabbit_image = [pygame.image.load("./img/rabbit_walk/rabbit" + str(i) +
-                                  ".png") for i in range(1,4)]
-rabbit_image_quad1 = [pygame.image.load("./img/rabbit_walk/right_rabbit" + str(
-    i) + ".png") for i in range(1,4)]
-
-grass_image = pygame.image.load("./img/grass.png")
-rabbit_initial_N = 10
-grass_quantity = 130
-rabbit_population = []
-grass_list = []
-days = 0
-rabbit_gestation_period = 200 #Also includes the time after birth to avoid
-# inbreeding
-rabbit_childhood = 70
 
 
 class Rabbit():
@@ -51,22 +35,24 @@ class Rabbit():
     def live(rabbit: object):
         # Rabbit appears
         if 90 < rabbit.random_degree <= 180:
-            object_appear(pygame.transform.rotate(rabbit_image[rabbit.steps
+            object_appear(pygame.transform.rotate(config.rabbit_image[
+                                                      rabbit.steps
                                                                %3], 10),
                 rabbit.pos_X, rabbit.pos_Y)
 
         elif 180 < rabbit.random_degree <= 270:
-            object_appear(pygame.transform.rotate(rabbit_image[rabbit.steps
+            object_appear(pygame.transform.rotate(config.rabbit_image[
+                                                      rabbit.steps
                                                                %3], -10),
                 rabbit.pos_X,rabbit.pos_Y)
 
         elif 0 < rabbit.random_degree <= 90:
-            object_appear(pygame.transform.rotate(rabbit_image_quad1[
+            object_appear(pygame.transform.rotate(config.rabbit_image_quad1[
                                                       rabbit.steps % 3],-10),
                   rabbit.pos_X,rabbit.pos_Y)
 
         else:
-            object_appear(pygame.transform.rotate(rabbit_image_quad1[
+            object_appear(pygame.transform.rotate(config.rabbit_image_quad1[
                                                       rabbit.steps % 3],10),
                   rabbit.pos_X,rabbit.pos_Y)
 
@@ -104,16 +90,16 @@ class Rabbit():
             rabbit.pos_X = 40
             reverse()
 
-        if rabbit.pos_X >= screen_width - 40:
-            rabbit.pos_X = screen_width - 40
+        if rabbit.pos_X >= config.screen_width - 40:
+            rabbit.pos_X = config.screen_width - 40
             reverse()
 
         if rabbit.pos_Y <= 40:
             rabbit.pos_Y = 40
             reverse()
 
-        if rabbit.pos_Y >= screen_height - 40:
-            rabbit.pos_Y = screen_height - 40
+        if rabbit.pos_Y >= config.screen_height - 40:
+            rabbit.pos_Y = config.screen_height - 40
             reverse()
 
         # Step counter
@@ -129,7 +115,7 @@ class Rabbit():
 
         # Rabbit eats only when hungry
         if rabbit.hunger > 50:
-            eaten_grass = isCollided(rabbit, grass_list)
+            eaten_grass = isCollided(rabbit, config.grass_list)
             if eaten_grass:
                 eaten_grass.isAlive = False
                 rabbit.hunger = 0
@@ -138,27 +124,27 @@ class Rabbit():
         if rabbit.gender == 'M' and rabbit.isAdult:
             mother = isCollided(rabbit, list(filter(lambda female: (
                     (female.gender == 'F' and not female.isPregnant) and
-                    rabbit.isAdult),rabbit_population)))
+                    rabbit.isAdult),config.rabbit_population)))
             if mother:
                 mother.isPregnant = True
-                print(mother.gender, mother.id)
+                print("Rabbit got pregnant")
 
         if rabbit.isPregnant:
             rabbit.gestation_days += 1
 
         if rabbit.isPregnant and rabbit.gestation_days == \
-                rabbit_gestation_period/2:
+                config.rabbit_gestation_period/2:
             litter_size = random.randint(5,10)
             rabbit_birth(litter_size)
 
-        if rabbit.gestation_days == rabbit_gestation_period:
+        if rabbit.gestation_days == config.rabbit_gestation_period:
             rabbit.isPregnant = False
             rabbit.gestation_days = 0
 
 
         #Rabbit Death
 
-        if rabbit.age > rabbit_childhood:
+        if rabbit.age > config.rabbit_childhood:
             rabbit.isAdult = True
         if rabbit.age == rabbit.life_span:
             rabbit.isAlive = False
@@ -167,17 +153,19 @@ class Rabbit():
 
 #Rabbit birth
 def rabbit_birth(rabbit_quantity):
-    print("birth")
-    for i in range(rabbit_quantity):
-        gender = 'F' if random.randint(0, 16) % 2 == 0 else 'M'
+    present_rabbit_population = len(config.rabbit_population)
+    print("birth", present_rabbit_population)
+    for i in range(present_rabbit_population,
+                   present_rabbit_population + rabbit_quantity):
+        gender = 'M' if random.randint(1, 9) % 3 == 0 else 'F'
         # Purposely slightly biased towards generating more females
         rabbit = Rabbit()
-        rabbit.id = i + len(rabbit_population)
-        rabbit.pos_X = random.randint(30, screen_width - 30)
-        rabbit.pos_Y = random.randint(30, screen_height - 30)
+        rabbit.id = i
+        rabbit.pos_X = random.randint(30, config.screen_width - 30)
+        rabbit.pos_Y = random.randint(30, config.screen_height - 30)
         rabbit.gender = gender
-        rabbit.life_span = random.randint(100,400)
-        rabbit_population.append(rabbit)
+        rabbit.life_span = random.randint(450,500)
+        config.rabbit_population.append(rabbit)
 
 
 
@@ -189,25 +177,25 @@ class Grass():
         self.isAlive = True
 
     def populate_grass(grass: object):
-        object_appear(grass_image, grass.pos_X, grass.pos_Y)
+        object_appear(config.grass_image, grass.pos_X, grass.pos_Y)
 
 
 def new_grass(new):
     for i in range(new):
         grass = Grass()
-        grass.pos_X = random.randint(10, screen_width - 10)
-        grass.pos_Y = random.randint(10, screen_height - 10)
-        grass_list.append(grass)
+        grass.pos_X = random.randint(10, config.screen_width - 10)
+        grass.pos_Y = random.randint(10, config.screen_height - 10)
+        config.grass_list.append(grass)
 
 
 
 
 # Initial grass generation
-for i in range(grass_quantity):
+for i in range(config.grass_quantity):
     grass = Grass()
-    grass.pos_X = random.randint(10, screen_width - 10)
-    grass.pos_Y = random.randint(10, screen_height - 10)
-    grass_list.append(grass)
+    grass.pos_X = random.randint(10, config.screen_width - 10)
+    grass.pos_Y = random.randint(10, config.screen_height - 10)
+    config.grass_list.append(grass)
 
 
 # Collision function
@@ -233,10 +221,11 @@ def object_appear(image, x, y):
 #         image_index = 1
 
 
-# Stats
-def print_stats():
-    for rabbit in rabbit_population:
-        print(rabbit.id, rabbit.age, rabbit.steps, rabbit.gender)
+# # Stats
+# def print_stats():
+#     for rabbit in config.rabbit_population:
+#         print(rabbit.id, rabbit.age, rabbit.steps,
+#               rabbit.gender)
 
 
 # Game_Loop
@@ -249,30 +238,30 @@ while game_running:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print_stats()
+            statistics.print_stats()
             game_running = False
 
 
     # Grass appears at a random space
-    for i in range(len(grass_list)):
-        if grass_list[i].isAlive:
-            Grass.populate_grass(grass_list[i])
+    for i in range(len(config.grass_list)):
+        if config.grass_list[i].isAlive:
+            Grass.populate_grass(config.grass_list[i])
     # Rabbit appears at a random space
-    if days == 0:
-        rabbit_birth(rabbit_initial_N)
-    for i in range(len(rabbit_population)):
-        if rabbit_population[i].isAlive:
-            Rabbit.live(rabbit_population[i])
+    if config.days == 0:
+        rabbit_birth(config.rabbit_initial_N)
+    for i in range(len(config.rabbit_population)):
+        if config.rabbit_population[i].isAlive:
+            Rabbit.live(config.rabbit_population[i])
 
 
     # Grass generation every 15 days
 
-    if days % 50 == 0:
+    if config.days % 50 == 0:
         new_grass_quantity = random.randint(10,15)
         new_grass(new_grass_quantity)
 
     # Days counter
-    days += 1
+    config.days += 1
 
     time.sleep(0.2)
 
