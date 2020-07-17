@@ -37,7 +37,11 @@ class Rabbit():
         self.isPregnant = False
         self.gestation_days = 0
         self.isAdult = False
-        self.life_span = 300
+        self.life_span = 500 #max_life_span
+        self.hunger_counter = 1
+        self.gestation_period = 200
+        self.childhood = 100
+        # Also includes the time after birth to avoid inbreeding
         self.reason_of_death = ''
 
 

@@ -5,7 +5,7 @@ import config
 import organisms
 
 
-def live(population_list, gestation_period,food_list,creature_class):
+def live(population_list, food_list, creature_class):
     for creature in population_list:
         if creature.isAlive:
             kinetics.move_creature(creature)
@@ -17,12 +17,12 @@ def live(population_list, gestation_period,food_list,creature_class):
             creature.age += 1
 
             # Hunger Counter
-            creature.hunger += 1
+            creature.hunger += creature.hunger_counter
             if creature.hunger >= 100:
-                creature.isAlive = False
+                # creature.isAlive = False
                 creature.reason_of_death = "Hunger"
 
-            # Rabbit eats only when hungry
+            # Creature eats only when hungry
             if creature.hunger > 50:
                 eaten_grass = game.isCollided(creature, food_list)
                 if eaten_grass:
@@ -41,36 +41,39 @@ def live(population_list, gestation_period,food_list,creature_class):
             if creature.isPregnant:
                 creature.gestation_days += 1
 
-            if creature.isPregnant and creature.gestation_days == (gestation_period/2):
-                litter_size = random.randint(5 ,10)
-                birth(creature_class ,litter_size ,population_list )
+            if creature.isPregnant and creature.gestation_days == (
+                    creature.gestation_period / 2):
+                litter_size = random.randint(5, 10)
+                birth(creature_class, litter_size, population_list)
 
-            if creature.gestation_days == gestation_period:
+            if creature.gestation_days == creature.gestation_period:
                 creature.isPregnant = False
                 creature.gestation_days = 0
 
-            if creature.age > config.rabbit_childhood:
+            if creature.age > creature.childhood:
                 creature.isAdult = True
 
-
-            #Death
+            # Death
             if creature.age == creature.life_span:
                 creature.isAlive = False
                 creature.reason_of_death = "Age"
 
 
-#Creature Birth
-def birth(creature_class , creature_quantity, creature_population: list):
+# Creature Birth
+def birth(creature_class, creature_quantity, creature_population: list):
     present_population = len(creature_population)
     print("birth", present_population)
     for i in range(present_population, present_population + creature_quantity):
         creature = creature_class()
-        gender = 'M' if random.randint(1, 9) % 3 == 0 else 'F'
+        gender = 'M' if random.random() < 0.45 else 'F'
         # Purposely slightly biased towards generating more females
         creature.id = i
-        creature.pos_X = random.randint(30, config.screen_width - 30)
-        creature.pos_Y = random.randint(30, config.screen_height - 30)
+        creature.pos_X = random.randint(config.tile_width + 20,
+                                        config.universe_width - config.tile_width - 20)
+        creature.pos_Y = random.randint(config.tile_height + 20,
+                                        config.universe_height - config.tile_height - 20)
         if creature_class != organisms.Grass:
             creature.gender = gender
-            creature.life_span = random.randint(450,500)
+            creature.life_span = random.randint(creature.life_span - 200,
+                                                creature.life_span)
         creature_population.append(creature)
