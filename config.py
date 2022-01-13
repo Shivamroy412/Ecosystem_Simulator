@@ -3,7 +3,7 @@ import map
 
 # Game Specifications
 game_running = True
-screen_width, screen_height = 1280, 768
+screen_width, screen_height =  1280, 768
 days = 0
 hunger_marker = False
 
@@ -24,79 +24,20 @@ grass_list = []
 # Map
 
 map = [
-    ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
-     'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G',
-     'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'E'],
-    ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
-     'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E']
-]
+    ['Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
+    ['Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em']]
+
+
 
 tile_width = 64
 tile_height = 64
@@ -112,8 +53,9 @@ print(universe_width, universe_height)
 
 grass_land_image = pygame.image.load("./img/map/grass_land.png")
 ground_land_image = pygame.image.load("./img/map/ground.png")
+#water_image = pygame.image.load("./img/map/water.png")
 
-tile_image_mapping = {'E': ground_land_image,
-                      'G': grass_land_image}
+tile_image_mapping = {'Em': ground_land_image,
+                      'Gm': grass_land_image,}
 
 scroll_speed = 192
