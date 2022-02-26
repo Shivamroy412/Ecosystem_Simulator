@@ -1,8 +1,10 @@
-import config
+from organisms import *
 
 
 # Stats
 def print_stats():
-    for rabbit in config.rabbit_list:
+    for rabbit in Rabbit.rabbit_list:
         print(rabbit.id, rabbit.age, rabbit.steps,
               rabbit.gender, rabbit.reason_of_death)
+        print("___________________________")
+

@@ -1,6 +1,5 @@
 import pygame
 import time
-import life
 import game
 import map
 from organisms import *
@@ -12,8 +11,8 @@ pygame.display.set_caption("Ecosystem Simulator")
 
 
 #Pioneer Population
-life.birth(Rabbit, config.rabbit_initial_N, config.rabbit_list)
-life.birth(Grass, config.grass_initial_quantity, config.grass_list)
+birth(Rabbit, config.rabbit_initial_N, Rabbit.rabbit_list)
+birth(Grass, config.grass_initial_quantity, Grass.grass_list)
 
 
 # Game_Loop
@@ -25,12 +24,12 @@ while config.game_running:
     map.Map.render_map()
 
     #Grass God
-    Grass().grass_populator()
-    Grass().new_grass_generator()
+    Grass.grass_populator()
+    Grass.new_grass_generator()
 
     #Rabbit God
-    life.live(population_list=config.rabbit_list,
-              food_list=config.grass_list, creature_class=Rabbit)
+    Rabbit.live(population_list= Rabbit.rabbit_list,
+              food_list=Grass.grass_list, creature_class=Rabbit)
 
     # Days counter
     config.days += 1

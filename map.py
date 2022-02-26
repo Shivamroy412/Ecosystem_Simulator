@@ -5,7 +5,7 @@ y_pos_map = 0
 x_pos_map = 0
 
 
-class Map():
+class Map:
 
     def __init__(self):
         self.tile_image = ''
