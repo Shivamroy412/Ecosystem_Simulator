@@ -41,14 +41,17 @@ class Organism:
         self.random_degree = 0
         self.hunger = 0
         self.isPregnant = False
+        self.partner = None
+        self.mother = None
+        self.father = None
         self.gestation_days = 0
         self.isAdult = False
         self.life_span = 500 #max_life_span
         self.hunger_counter = 1
         self.gestation_period = 200
-        self.childhood = 100
-        # Also includes the time after birth to avoid inbreeding
+        self.childhood = 100 # Also includes the time after birth to avoid inbreeding
         self.reason_of_death = ''
+        self.litter_size = (3, 5)
 
 
 
@@ -134,8 +137,10 @@ class Organism:
     def birth( creature_class, creature_quantity, creature_population: list, self = None):
    
         present_population = len(creature_population)
-        if creature_class != Grass:
+
+        if creature_class != Grass and self:
             print("Birth happened: The present population is {}".format(present_population))
+
         for i in range(present_population, present_population + creature_quantity):
             creature = creature_class()
             
@@ -152,12 +157,17 @@ class Organism:
                 creature.life_span = random.randint(creature.life_span - 200,
                                                     creature.life_span)
     
+
+                if self:
+                    creature.mother = self
+                    creature.father = self.partner
+
             creature_population.append(creature)
  
 
 
-
-    def live(population_list, food_list, creature_class):
+    @classmethod
+    def live(cls, population_list, food_list, creature_class):
         #print(population_list)
         for creature in population_list:
             #print(creature.pos_X)
@@ -192,15 +202,16 @@ class Organism:
                             creature.isAdult), population_list)))
                     if mother:
                         mother.isPregnant = True
+                        mother.partner = creature
                         print("Rabbit got pregnant")
 
                 if creature.isPregnant:
                     creature.gestation_days += 1
 
                 if creature.isPregnant and creature.gestation_days == (
-                        creature.gestation_period / 4):
-                    litter_size = random.randint(5, 10)
-                    Organism.birth(creature_class, litter_size, population_list, creature)
+                        creature.gestation_period / 2):
+                    litter_size = random.randint(*creature.litter_size)
+                    cls.birth(creature_class, litter_size, population_list, creature)
 
                 if creature.gestation_days == creature.gestation_period:
                     creature.isPregnant = False
@@ -226,6 +237,7 @@ class Rabbit(Organism):
     rabbit_list = []
     def __init__(self):
         super().__init__()
+        self.litter_size = (5, 8)
 
 
 
