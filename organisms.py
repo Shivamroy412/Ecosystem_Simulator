@@ -4,32 +4,6 @@ import game
 import math
 import pygame
 
-#print(help(config))
-
-
-        
-# Creature Birth
-def birth(creature_class, creature_quantity, creature_population: list):
-    present_population = len(creature_population)
-    print("Birth happened: The present population is {}".format(present_population))
-    for i in range(present_population, present_population + creature_quantity):
-        creature = creature_class()
-        
-        creature.id = i
-        creature.pos_X = random.randint(config.tile_width + 20,
-                                        config.universe_width - config.tile_width - 20)
-        creature.pos_Y = random.randint(config.tile_height + 20,
-                                        config.universe_height - config.tile_height - 20)
-
-                             
-        if not isinstance(creature, Grass): 
-            creature.gender = 'M' if random.random() < 0.45 else 'F'
-            # Purposely slightly biased towards generating more females
-            creature.life_span = random.randint(creature.life_span - 200,
-                                                creature.life_span)
-  
-        creature_population.append(creature)
-
 
 #Grass
 class Grass:
@@ -44,7 +18,7 @@ class Grass:
         
         if config.days % 50 == 0:
             new_grass_quantity = random.randint(10, 15)
-            birth(Grass, new_grass_quantity, Grass.grass_list)
+            Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
 
     def grass_populator():
         for grass in Grass.grass_list:
@@ -155,6 +129,32 @@ class Organism:
 
 
 
+    #Birth
+    # Creature Birth
+    def birth( creature_class, creature_quantity, creature_population: list, self = None):
+   
+        present_population = len(creature_population)
+        if creature_class != Grass:
+            print("Birth happened: The present population is {}".format(present_population))
+        for i in range(present_population, present_population + creature_quantity):
+            creature = creature_class()
+            
+            creature.id = i
+            creature.pos_X = random.randint(config.tile_width + 20,
+                                            config.universe_width - config.tile_width - 20)
+            creature.pos_Y = random.randint(config.tile_height + 20,
+                                            config.universe_height - config.tile_height - 20)
+
+                                
+            if not isinstance(creature, Grass): 
+                creature.gender = 'M' if random.random() < 0.45 else 'F'
+                # Purposely slightly biased towards generating more females
+                creature.life_span = random.randint(creature.life_span - 200,
+                                                    creature.life_span)
+    
+            creature_population.append(creature)
+ 
+
 
 
     def live(population_list, food_list, creature_class):
@@ -182,6 +182,7 @@ class Organism:
                     eaten_grass = game.isCollided(creature, food_list)
                     if eaten_grass:
                         eaten_grass.isAlive = False
+                        food_list.remove(eaten_grass)
                         creature.hunger = 0
 
                 # Reproduction
@@ -197,9 +198,9 @@ class Organism:
                     creature.gestation_days += 1
 
                 if creature.isPregnant and creature.gestation_days == (
-                        creature.gestation_period / 2):
+                        creature.gestation_period / 4):
                     litter_size = random.randint(5, 10)
-                    creature.birth(creature_class, litter_size, population_list)
+                    Organism.birth(creature_class, litter_size, population_list, creature)
 
                 if creature.gestation_days == creature.gestation_period:
                     creature.isPregnant = False
@@ -212,6 +213,7 @@ class Organism:
                 if creature.age == creature.life_span:
                     creature.isAlive = False
                     creature.reason_of_death = "Age"
+                    population_list.remove(creature)
 
 
 

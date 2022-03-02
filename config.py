@@ -13,13 +13,17 @@ rabbit_image = [pygame.image.load("./img/rabbit_walk/rabbit" + str(i) +
 rabbit_image_quad1 = [pygame.image.load("./img/rabbit_walk/right_rabbit" + str(
     i) + ".png") for i in range(1, 4)]
 
-rabbit_initial_N = 8
+rabbit_initial_N = 18
 #rabbit_list = []
 
 # Grass
 grass_image = pygame.image.load("./img/grass.png")
 grass_initial_quantity = 10
 #grass_list = []
+
+
+
+
 
 # Map
 
