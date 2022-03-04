@@ -34,11 +34,11 @@ class Organism:
         self.pos_X = 0
         self.pos_Y = 0
         self.age = 0
-        self.gender = 'F'
+        self.gender = 'M' if random.random() < 0.45 else 'F' # Slightly biased towards generating more females
         self.isAlive = True
         self.steps = 0
-        self.random_speed = 3
-        self.random_degree = 0
+        self.speed = random.uniform(1.0, 6.0)
+        self.degree = 0
         self.hunger = 0
         self.isPregnant = False
         self.partner = None
@@ -46,7 +46,7 @@ class Organism:
         self.father = None
         self.gestation_days = 0
         self.isAdult = False
-        self.life_span = 500 #max_life_span
+        self.life_span = random.randint(150, 400) #max_life_span of particular creature
         self.hunger_counter = 1
         self.gestation_period = 200
         self.childhood = 100 # Also includes the time after birth to avoid inbreeding
@@ -62,20 +62,20 @@ class Organism:
     # Kinetics
     def move_creature(self):
         creature = self
-        if 90 < creature.random_degree <= 180:
+        if 90 < creature.degree <= 180:
 
             game.object_appear(pygame.transform.rotozoom(config.rabbit_image[
                                                         creature.steps % 3], 10, 
                                                         creature.size_ratio),
                             creature.pos_X, creature.pos_Y)
 
-        elif 180 < creature.random_degree <= 270:
+        elif 180 < creature.degree <= 270:
             game.object_appear(
                 pygame.transform.rotozoom(config.rabbit_image[creature.steps % 3],
                                         -10, creature.size_ratio),
                 creature.pos_X, creature.pos_Y)
 
-        elif 0 < creature.random_degree <= 90:
+        elif 0 < creature.degree <= 90:
             game.object_appear(pygame.transform.rotozoom(
                 config.rabbit_image_quad1[creature.steps % 3],
                 -10, creature.size_ratio), creature.pos_X, creature.pos_Y)
@@ -105,19 +105,19 @@ class Organism:
 
         # Changes direction after every 30 steps
         if creature.steps % 30 == 0:
-            creature.random_degree = random.randint(0, 360)
+            creature.degree = random.randint(0, 360)
 
-        creature.pos_X += creature.random_speed * math.cos(math.radians(
-            creature.random_degree))
-        creature.pos_Y += creature.random_speed * math.sin(math.radians(
-            creature.random_degree))
+        creature.pos_X += creature.speed * math.cos(math.radians(
+            creature.degree))
+        creature.pos_Y += creature.speed * math.sin(math.radians(
+            creature.degree))
 
         # Reverses direction
         def reverse(creature):
-            if creature.random_degree < 180:
-                creature.random_degree += 180
+            if creature.degree < 180:
+                creature.degree += 180
             else:
-                creature.random_degree -= 180
+                creature.degree -= 180
 
         # Keeps the rabbit within the boundaries
         if creature.pos_X <= game.bound_screen.left + 32:
@@ -152,9 +152,19 @@ class Organism:
                 creature.mother = self
                 creature.father = self.partner
 
+                #Below traits are alreay assigned on birth, however this should be considered as a mutation
+                #The creature has a 45%-45% chance of inheriting these traits from either parents and 10% 
+                # through mutation
+                creature.speed = random.choices([creature.father.speed, creature.mother.speed, creature.speed], 
+                                                cum_weights= [0.45, 0.45, 0.1], k = 1)[0] #choices() returns a list
+                creature.life_span = random.choices([creature.father.life_span, creature.mother.life_span, 
+                                                    creature.life_span], cum_weights= [0.45, 0.45, 0.1], k = 1)[0]
+
+
                 #New rabbits spawn near mother
                 creature.pos_X = creature.mother.pos_X 
                 creature.pos_Y = creature.mother.pos_Y
+
 
             else:           
                 creature.pos_X = random.randint(config.tile_width + 20,
@@ -166,22 +176,18 @@ class Organism:
             if not isinstance(creature, Grass): 
                 print("Birth happened: The present population is {}".format(present_population))
                 
-                creature.gender = 'M' if random.random() < 0.45 else 'F'
-                # Purposely slightly biased towards generating more females
                 
-                creature.life_span = random.randint(creature.life_span - 200,
-                                                    creature.life_span)
-    
+                
+            
             creature_population.append(creature)
  
 
 
     @classmethod
     def live(cls, population_list, food_list, creature_class):
-        #print(population_list)
+   
         for creature in population_list:
-            #print(creature.pos_X)
-            #print(creature.id)
+            
             if creature.isAlive:
                 creature.move_creature()
 
@@ -244,7 +250,7 @@ class Rabbit(Organism):
     rabbit_list = []
     def __init__(self):
         super().__init__()
-        self.litter_size = (5, 8)
+        self.litter_size = (2, 5)
 
 
 
