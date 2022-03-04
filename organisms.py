@@ -34,7 +34,7 @@ class Organism:
         self.pos_X = 0
         self.pos_Y = 0
         self.age = 0
-        self.gender = ''
+        self.gender = 'F'
         self.isAlive = True
         self.steps = 0
         self.random_speed = 3
@@ -54,30 +54,36 @@ class Organism:
         self.litter_size = (3, 5)
 
 
+    @property
+    def size_ratio(self):
+        return min(0.35 + (self.age/300), 1) #Gradually increses size of creature with age
 
 
+    # Kinetics
     def move_creature(self):
         creature = self
         if 90 < creature.random_degree <= 180:
-            game.object_appear(pygame.transform.rotate(config.rabbit_image[
-                                                        creature.steps % 3], 10),
+
+            game.object_appear(pygame.transform.rotozoom(config.rabbit_image[
+                                                        creature.steps % 3], 10, 
+                                                        creature.size_ratio),
                             creature.pos_X, creature.pos_Y)
 
         elif 180 < creature.random_degree <= 270:
             game.object_appear(
-                pygame.transform.rotate(config.rabbit_image[creature.steps % 3],
-                                        -10),
+                pygame.transform.rotozoom(config.rabbit_image[creature.steps % 3],
+                                        -10, creature.size_ratio),
                 creature.pos_X, creature.pos_Y)
 
         elif 0 < creature.random_degree <= 90:
-            game.object_appear(pygame.transform.rotate(
+            game.object_appear(pygame.transform.rotozoom(
                 config.rabbit_image_quad1[creature.steps % 3],
-                -10), creature.pos_X, creature.pos_Y)
+                -10, creature.size_ratio), creature.pos_X, creature.pos_Y)
 
         else:
-            game.object_appear(pygame.transform.rotate(
-                config.rabbit_image_quad1[creature.steps % 3], 10), creature.pos_X,
-                creature.pos_Y)
+            game.object_appear(pygame.transform.rotozoom(
+                config.rabbit_image_quad1[creature.steps % 3], 10, creature.size_ratio),
+                 creature.pos_X, creature.pos_Y)
 
         # Gender marker
         pygame.draw.circle(game.universe_screen,
@@ -138,30 +144,34 @@ class Organism:
    
         present_population = len(creature_population)
 
-        if creature_class != Grass and self:
-            print("Birth happened: The present population is {}".format(present_population))
-
         for i in range(present_population, present_population + creature_quantity):
             creature = creature_class()
-            
             creature.id = i
-            creature.pos_X = random.randint(config.tile_width + 20,
-                                            config.universe_width - config.tile_width - 20)
-            creature.pos_Y = random.randint(config.tile_height + 20,
-                                            config.universe_height - config.tile_height - 20)
+            
+            if self:
+                creature.mother = self
+                creature.father = self.partner
+
+                #New rabbits spawn near mother
+                creature.pos_X = creature.mother.pos_X 
+                creature.pos_Y = creature.mother.pos_Y
+
+            else:           
+                creature.pos_X = random.randint(config.tile_width + 20,
+                                                config.universe_width - config.tile_width - 20)
+                creature.pos_Y = random.randint(config.tile_height + 20,
+                                                config.universe_height - config.tile_height - 20)
 
                                 
             if not isinstance(creature, Grass): 
+                print("Birth happened: The present population is {}".format(present_population))
+                
                 creature.gender = 'M' if random.random() < 0.45 else 'F'
                 # Purposely slightly biased towards generating more females
+                
                 creature.life_span = random.randint(creature.life_span - 200,
                                                     creature.life_span)
     
-
-                if self:
-                    creature.mother = self
-                    creature.father = self.partner
-
             creature_population.append(creature)
  
 
@@ -225,9 +235,6 @@ class Organism:
                     creature.isAlive = False
                     creature.reason_of_death = "Age"
                     population_list.remove(creature)
-
-
-
 
 
 
