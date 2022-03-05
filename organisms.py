@@ -33,11 +33,13 @@ class Organism:
         self.id = 0
         self.pos_X = 0
         self.pos_Y = 0
+        self.image_roaster_left = []
+        self.image_roaster_right = []
         self.age = 0
         self.gender = 'M' if random.random() < 0.45 else 'F' # Slightly biased towards generating more females
         self.isAlive = True
         self.steps = 0
-        self.speed = random.uniform(1.0, 6.0)
+        self.speed = 0
         self.degree = 0
         self.hunger = 0
         self.isPregnant = False
@@ -53,36 +55,48 @@ class Organism:
         self.reason_of_death = ''
         self.litter_size = (3, 5)
 
+        self.max_size_ratio = 1
+        self.min_size_ratio = 0.35
 
+    #Gradually increses size of creature with age
     @property
     def size_ratio(self):
-        return min(0.35 + (self.age/300), 1) #Gradually increses size of creature with age
+        return min(self.min_size_ratio + (self.age/300), self.max_size_ratio)
+        
+    @property
+    def img_intervals(self):
+        return len(self.image_roaster_left) - 1    
 
 
     # Kinetics
     def move_creature(self):
         creature = self
+
+        
+
+
         if 90 < creature.degree <= 180:
 
-            game.object_appear(pygame.transform.rotozoom(config.rabbit_image[
-                                                        creature.steps % 3], 10, 
+            game.object_appear(pygame.transform.rotozoom(self.image_roaster_left[
+                                                        creature.steps % self.img_intervals], 10, 
                                                         creature.size_ratio),
                             creature.pos_X, creature.pos_Y)
 
         elif 180 < creature.degree <= 270:
             game.object_appear(
-                pygame.transform.rotozoom(config.rabbit_image[creature.steps % 3],
+                pygame.transform.rotozoom(self.image_roaster_left[creature.steps % self.img_intervals],
                                         -10, creature.size_ratio),
                 creature.pos_X, creature.pos_Y)
 
         elif 0 < creature.degree <= 90:
             game.object_appear(pygame.transform.rotozoom(
-                config.rabbit_image_quad1[creature.steps % 3],
+                self.image_roaster_right[creature.steps % self.img_intervals],
                 -10, creature.size_ratio), creature.pos_X, creature.pos_Y)
 
         else:
             game.object_appear(pygame.transform.rotozoom(
-                config.rabbit_image_quad1[creature.steps % 3], 10, creature.size_ratio),
+                self.image_roaster_right[creature.steps % self.img_intervals], 10,
+                 creature.size_ratio),
                  creature.pos_X, creature.pos_Y)
 
         # Gender marker
@@ -183,6 +197,21 @@ class Organism:
  
 
 
+
+    def death(self, population_list: list, reason = None):
+
+        if not isinstance(self, Grass):
+            self.reason_of_death = reason
+
+        self.isAlive = False
+        population_list.remove(self)
+
+
+
+
+
+
+
     @classmethod
     def live(cls, population_list, food_list, creature_class):
    
@@ -199,16 +228,16 @@ class Organism:
 
                 # Hunger Counter
                 creature.hunger += creature.hunger_counter
-                if creature.hunger >= 100:
-                    # creature.isAlive = False
-                    creature.reason_of_death = "Hunger"
+                if creature.hunger >= 200:                   #Max_Hunger 
+                    creature.death(population_list, "Hunger")
 
                 # Creature eats only when hungry
                 if creature.hunger > 50:
-                    eaten_grass = game.isCollided(creature, food_list)
-                    if eaten_grass:
-                        eaten_grass.isAlive = False
-                        food_list.remove(eaten_grass)
+                    eaten = game.isCollided(creature, food_list)
+                    if eaten:
+                        cls.death(eaten, food_list, "Eaten") 
+                        #Calling death() as a classmethod and passing the instance since 
+                        #Grass class does not have a death() method
                         creature.hunger = 0
 
                 # Reproduction
@@ -238,9 +267,7 @@ class Organism:
 
                 # Death
                 if creature.age == creature.life_span:
-                    creature.isAlive = False
-                    creature.reason_of_death = "Age"
-                    population_list.remove(creature)
+                    creature.death(population_list, reason = "Age")
 
 
 
@@ -250,7 +277,28 @@ class Rabbit(Organism):
     rabbit_list = []
     def __init__(self):
         super().__init__()
-        self.litter_size = (2, 5)
+        
+        self.image_roaster_left = config.rabbit_image_left
+        self.image_roaster_right = config.rabbit_image_right
+
+        self.litter_size = (5, 8)
+        self.speed = random.uniform(1.0, 6.0)
+
+        self.max_size_ratio = 0.85
+        self.min_size_ratio = 0.35
 
 
+#Fox
+class Fox(Organism):
+    fox_list = []
+    def __init__(self):
+        super().__init__()
 
+        self.image_roaster_left = config.fox_image_left
+        self.image_roaster_right = config.fox_image_right
+
+        self.litter_size = (1, 3)
+        self.speed = random.uniform(1.5, 3)
+
+        self.max_size_ratio = 1.0
+        self.min_size_ratio = 0.6

@@ -1,5 +1,6 @@
 import pygame
 import map
+import os
 
 # Game Specifications
 game_running = True
@@ -8,17 +9,29 @@ days = 0
 hunger_marker = False
 
 # Rabbit
-rabbit_image = [pygame.image.load("./img/rabbit_walk/rabbit" + str(i) +
-                                  ".png") for i in range(1, 4)]
-rabbit_image_quad1 = [pygame.image.load("./img/rabbit_walk/right_rabbit" + str(
-    i) + ".png") for i in range(1, 4)]
+rabbit_image_left = [pygame.image.load(os.path.join('img', 'rabbit_walk',
+                                "rabbit" + str(i) +
+                                  ".png")) for i in range(1, 4)]
+rabbit_image_right = [pygame.image.load(os.path.join('img', 'rabbit_walk',
+                                "right_rabbit" + str(i) +
+                                  ".png")) for i in range(1, 4)]
+rabbit_initial_N = 25
 
-rabbit_initial_N = 18
 
+#Fox
+fox_image_left = [pygame.image.load(os.path.join('img', 'fox_walk',
+                                "fox" + str(i) +
+                                  ".png")) for i in range(1, 6)]
+
+fox_image_right = [pygame.image.load(os.path.join('img', 'fox_walk',
+                                "right_fox" + str(i) +
+                                  ".png")) for i in range(1, 6)]
+
+fox_initial_N = 6
 
 # Grass
-grass_image = pygame.image.load("./img/grass.png")
-grass_initial_quantity = 10
+grass_image = pygame.image.load(os.path.join("img", "grass.png"))
+grass_initial_quantity = 80
 
 
 # Map
@@ -50,8 +63,8 @@ print(universe_width, universe_height)
 
 print(universe_width, universe_height)
 
-grass_land_image = pygame.image.load("./img/map/grass_land.png")
-ground_land_image = pygame.image.load("./img/map/ground.png")
+grass_land_image = pygame.image.load(os.path.join("img", "map", "grass_land.png"))
+ground_land_image = pygame.image.load(os.path.join("img","map", "ground.png"))
 #water_image = pygame.image.load("./img/map/water.png")
 
 tile_image_mapping = {'Em': ground_land_image,
