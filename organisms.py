@@ -48,7 +48,7 @@ class Organism:
         self.father = None
         self.gestation_days = 0
         self.isAdult = False
-        self.life_span = random.randint(150, 400) #max_life_span of particular creature
+        self.life_span = 0 
         self.hunger_counter = 1
         self.gestation_period = 200
         self.childhood = 100 # Also includes the time after birth to avoid inbreeding
@@ -241,7 +241,7 @@ class Organism:
                         creature.hunger = 0
 
                 # Reproduction
-                if creature.gender == 'M' and creature.isAdult:
+                if creature.gender == 'M' and creature.isAdult and creature.hunger <= 50: #Hunger > Reproductive urge
                     mother = game.isCollided(creature, list(filter(lambda female: (
                             (female.gender == 'F' and not female.isPregnant) and
                             creature.isAdult), population_list)))
@@ -283,6 +283,7 @@ class Rabbit(Organism):
 
         self.litter_size = (5, 8)
         self.speed = random.uniform(1.0, 6.0)
+        self.life_span = random.randint(150, 400) 
 
         self.max_size_ratio = 0.85
         self.min_size_ratio = 0.35
@@ -299,6 +300,7 @@ class Fox(Organism):
 
         self.litter_size = (1, 3)
         self.speed = random.uniform(1.5, 3)
+        self.life_span = random.randint(750, 1000) 
 
         self.max_size_ratio = 1.0
         self.min_size_ratio = 0.6

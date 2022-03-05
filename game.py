@@ -23,13 +23,20 @@ def object_appear(image, x, y):
 
 
 # Collision function
-def isCollided(object1: object, object2_list: list):
+def isCollided(object1: object, object2_list: list, distance_formula = "Manhattan"):
     for object2 in object2_list:
         if object2.isAlive:
-            distance = math.sqrt((object1.pos_X - object2.pos_X) ** 2 + (
-                    object1.pos_Y - object2.pos_Y) ** 2)
-            if 40 > distance > 0:
-                return object2
+
+            if distance_formula == "Euclidean":
+                distance = math.sqrt((object1.pos_X - object2.pos_X) ** 2 + (
+                        object1.pos_Y - object2.pos_Y) ** 2)
+                if 40 > distance > 0:
+                    return object2
+            
+            if distance_formula == "Manhattan":       #Reduces computational overhead
+                distance = abs(object1.pos_X - object2.pos_X) + abs(object1.pos_Y - object2.pos_Y)
+                if 40 > distance > 0:
+                    return object2
 
 
 # Handle Events
