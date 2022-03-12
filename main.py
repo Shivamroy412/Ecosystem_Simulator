@@ -4,6 +4,7 @@ import game
 import map
 import statistics
 from organisms import *
+import brain
 
 
 # Initialize pygame
@@ -39,6 +40,16 @@ while config.game_running:
     #Fox God
     Fox.live(population_list=Fox.fox_list, 
             food_list=Rabbit.rabbit_list, creature_class=Fox)
+
+
+    
+
+    universe = brain.Universe(Grass.grass_list, Rabbit.rabbit_list, Fox.fox_list)
+    
+    if config.days > 1:
+        print(config.days, universe.universe_matrix.sum())
+        
+    
 
     # Days counter
     config.days += 1

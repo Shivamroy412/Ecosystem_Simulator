@@ -30,5 +30,5 @@ class Map:
                                        map_tile_object.pos_Y)
                     config.map_tiles_list.append(map_tile_object)
 
-                cam_x_pos_map += config.tile_width
-            cam_y_pos_map += config.tile_height
+                cam_x_pos_map += config.TILE_WIDTH
+            cam_y_pos_map += config.TILE_HEIGHT

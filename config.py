@@ -4,9 +4,15 @@ import os
 
 # Game Specifications
 game_running = True
-screen_width, screen_height =  1280, 768
+training = False 
+
+SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
+
 days = 0
 hunger_marker = False
+
+
+
 
 # Rabbit
 rabbit_image_left = [pygame.image.load(os.path.join('img', 'rabbit_walk',
@@ -27,7 +33,7 @@ fox_image_right = [pygame.image.load(os.path.join('img', 'fox_walk',
                                 "right_fox" + str(i) +
                                   ".png")) for i in range(1, 6)]
 
-fox_initial_N = 6
+fox_initial_N = 10
 
 # Grass
 grass_image = pygame.image.load(os.path.join("img", "grass.png"))
@@ -51,13 +57,13 @@ map = [
 
 
 
-tile_width = 64
-tile_height = 64
+TILE_WIDTH = 64
+TILE_HEIGHT = 64
 
 map_tiles_list = []
 
-universe_height = int(len(map) * tile_height)
-universe_width = int(len(map[0]) * tile_width)
+universe_height = int(len(map) * TILE_HEIGHT)
+universe_width = int(len(map[0]) * TILE_WIDTH)
 
 print(universe_width, universe_height)
 

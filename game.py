@@ -4,15 +4,15 @@ import pygame
 import statistics
 import map
 
-screen = pygame.display.set_mode((config.screen_width, config.screen_height))
+screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 universe_screen = pygame.Surface((config.universe_width,
                                   config.universe_height))
 
 # Grass_area
-bound_screen = pygame.Rect(config.tile_width, config.tile_height,
+bound_screen = pygame.Rect(config.TILE_WIDTH, config.TILE_HEIGHT,
                            config.universe_width -
-                           2 * config.tile_width,
-                           config.universe_height - 2 * config.tile_height)
+                           2 * config.TILE_WIDTH,
+                           config.universe_height - 2 * config.TILE_HEIGHT)
 
 pygame.key.set_repeat()
 
@@ -52,7 +52,7 @@ def handle_events():
             map.x_pos_map += config.scroll_speed
 
     if keys[pygame.K_RIGHT]:
-        if map.x_pos_map > config.screen_width - config.universe_width:
+        if map.x_pos_map > config.SCREEN_WIDTH - config.universe_width:
             map.x_pos_map -= config.scroll_speed
 
     if keys[pygame.K_UP]:
@@ -60,5 +60,5 @@ def handle_events():
             map.y_pos_map += config.scroll_speed
 
     if keys[pygame.K_DOWN]:
-        if map.y_pos_map > config.screen_height - config.universe_height:
+        if map.y_pos_map > config.SCREEN_HEIGHT - config.universe_height:
             map.y_pos_map -= config.scroll_speed

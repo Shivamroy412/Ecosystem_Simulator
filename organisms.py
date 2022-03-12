@@ -13,11 +13,11 @@ class Grass:
         self.pos_Y = 0
         self.isAlive = True
 
-    # Grass generation every 15 days
+    # Grass generation every 40 days
     def new_grass_generator():
         
-        if config.days % 50 == 0:
-            new_grass_quantity = random.randint(10, 15)
+        if config.days % 40 == 0:
+            new_grass_quantity = random.randint(20, 30)
             Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
 
     def grass_populator():
@@ -41,18 +41,25 @@ class Organism:
         self.steps = 0
         self.speed = 0
         self.degree = 0
-        self.hunger = 0
-        self.isPregnant = False
+        
+        
+
         self.partner = None
         self.mother = None
         self.father = None
+
+        self.isPregnant = False
         self.gestation_days = 0
         self.isAdult = False
         self.life_span = 0 
-        self.hunger_counter = 1
         self.gestation_period = 200
         self.childhood = 100 # Also includes the time after birth to avoid inbreeding
         self.reason_of_death = ''
+
+        self.hunger = 0
+        self.again_hungry = 50 
+        self.max_hunger_limit = 150
+        
         self.litter_size = (3, 5)
 
         self.max_size_ratio = 1
@@ -181,14 +188,15 @@ class Organism:
 
 
             else:           
-                creature.pos_X = random.randint(config.tile_width + 20,
-                                                config.universe_width - config.tile_width - 20)
-                creature.pos_Y = random.randint(config.tile_height + 20,
-                                                config.universe_height - config.tile_height - 20)
+                creature.pos_X = random.randint(config.TILE_WIDTH + 20,
+                                                config.universe_width - config.TILE_WIDTH - 20)
+                creature.pos_Y = random.randint(config.TILE_HEIGHT + 20,
+                                                config.universe_height - config.TILE_HEIGHT - 20)
 
                                 
             if not isinstance(creature, Grass): 
-                print("Birth happened: The present population is {}".format(present_population))
+                pass
+                #print("Birth happened: The present population is {}".format(present_population))
                 
                 
                 
@@ -227,12 +235,12 @@ class Organism:
                 creature.age += 1
 
                 # Hunger Counter
-                creature.hunger += creature.hunger_counter
-                if creature.hunger >= 200:                   #Max_Hunger 
+                creature.hunger += 1
+                if creature.hunger >= creature.max_hunger_limit:                   
                     creature.death(population_list, "Hunger")
 
                 # Creature eats only when hungry
-                if creature.hunger > 50:
+                if creature.hunger > creature.again_hungry:
                     eaten = game.isCollided(creature, food_list)
                     if eaten:
                         cls.death(eaten, food_list, "Eaten") 
@@ -241,14 +249,15 @@ class Organism:
                         creature.hunger = 0
 
                 # Reproduction
-                if creature.gender == 'M' and creature.isAdult and creature.hunger <= 50: #Hunger > Reproductive urge
+                if creature.gender == 'M' and creature.isAdult and creature.hunger <= creature.again_hungry: 
+                    #Hunger > Reproductive urge
                     mother = game.isCollided(creature, list(filter(lambda female: (
                             (female.gender == 'F' and not female.isPregnant) and
                             creature.isAdult), population_list)))
                     if mother:
                         mother.isPregnant = True
                         mother.partner = creature
-                        print("Rabbit got pregnant")
+                        print(f"{creature_class.__name__} got pregnant")
 
                 if creature.isPregnant:
                     creature.gestation_days += 1
@@ -282,11 +291,14 @@ class Rabbit(Organism):
         self.image_roaster_right = config.rabbit_image_right
 
         self.litter_size = (5, 8)
-        self.speed = random.uniform(1.0, 6.0)
+        self.speed = random.uniform(1.0, 5.0)
         self.life_span = random.randint(150, 400) 
 
         self.max_size_ratio = 0.85
         self.min_size_ratio = 0.35
+
+        self.again_hungry = 50 
+        self.max_hunger_limit = 250
 
 
 #Fox
@@ -298,9 +310,12 @@ class Fox(Organism):
         self.image_roaster_left = config.fox_image_left
         self.image_roaster_right = config.fox_image_right
 
-        self.litter_size = (1, 3)
-        self.speed = random.uniform(1.5, 3)
-        self.life_span = random.randint(750, 1000) 
+        self.litter_size = (3, 6)
+        self.speed = random.uniform(2.0, 4.0)
+        self.life_span = random.randint(1200, 1500) 
 
         self.max_size_ratio = 1.0
         self.min_size_ratio = 0.6
+
+        self.again_hungry = 150 
+        self.max_hunger_limit = 500
