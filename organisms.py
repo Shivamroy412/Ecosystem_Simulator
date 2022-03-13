@@ -3,29 +3,7 @@ import random
 import game
 import math
 import pygame
-
-
-#Grass
-class Grass:
-    grass_list = []
-    def __init__(self):
-        self.pos_X = 0
-        self.pos_Y = 0
-        self.isAlive = True
-
-    # Grass generation every 40 days
-    def new_grass_generator():
-        
-        if config.days % 40 == 0:
-            new_grass_quantity = random.randint(20, 30)
-            Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
-
-    def grass_populator():
-        for grass in Grass.grass_list:
-            if grass.isAlive:
-                game.object_appear(config.grass_image, grass.pos_X, grass.pos_Y)
-
-
+import numpy as np
 
 class Organism:
 
@@ -40,10 +18,7 @@ class Organism:
         self.isAlive = True
         self.steps = 0
         self.speed = 0
-        self.degree = 0
         
-        
-
         self.partner = None
         self.mother = None
         self.father = None
@@ -55,17 +30,24 @@ class Organism:
         self.gestation_period = 200
         self.childhood = 100 # Also includes the time after birth to avoid inbreeding
         self.reason_of_death = ''
+        self.degree = random.randint(0, 360) 
 
         self.hunger = 0
         self.again_hungry = 50 
         self.max_hunger_limit = 150
         
-        self.litter_size = (3, 5)
+        self.litter_size_range = (3, 5)
 
         self.max_size_ratio = 1
         self.min_size_ratio = 0.35
 
-    #Gradually increses size of creature with age
+
+    @property 
+    def brain(self):
+        return Organism.Brain(creature = self)
+
+    
+    #Gradually increaes size of creature with age
     @property
     def size_ratio(self):
         return min(self.min_size_ratio + (self.age/300), self.max_size_ratio)
@@ -79,8 +61,9 @@ class Organism:
     def move_creature(self):
         creature = self
 
-        
-
+        # Changes direction after every 30 steps
+        if self.steps % 2 == 0:
+            creature.degree = random.randint(0, 360)
 
         if 90 < creature.degree <= 180:
 
@@ -119,15 +102,10 @@ class Organism:
 
             pygame.draw.rect(game.universe_screen, (255, 75, 0, 0.3),
                             (creature.pos_X, creature.pos_Y - 5,
-                            (40 / 100) * creature.hunger, 3),
+                            (32 /creature.max_hunger_limit) * creature.hunger, 3),
                             0)  # Marker
 
         # Movements
-
-        # Changes direction after every 30 steps
-        if creature.steps % 30 == 0:
-            creature.degree = random.randint(0, 360)
-
         creature.pos_X += creature.speed * math.cos(math.radians(
             creature.degree))
         creature.pos_Y += creature.speed * math.sin(math.radians(
@@ -156,6 +134,23 @@ class Organism:
         if creature.pos_Y >= game.bound_screen.bottom - 32:
             creature.pos_Y = game.bound_screen.bottom - 32
             reverse(creature)
+
+
+    # Collision function
+    def isCollided(self, object2_list: list, distance_formula = "Manhattan"):
+        for object2 in object2_list:
+            if object2.isAlive:
+
+                if distance_formula == "Euclidean":
+                    distance = math.sqrt((self.pos_X - object2.pos_X) ** 2 + (
+                            self.pos_Y - object2.pos_Y) ** 2)
+                    if 40 > distance > 0:
+                        return object2
+                
+                if distance_formula == "Manhattan":       #Reduces computational overhead
+                    distance = abs(self.pos_X - object2.pos_X) + abs(self.pos_Y - object2.pos_Y)
+                    if 40 > distance > 0:
+                        return object2
 
 
 
@@ -188,10 +183,10 @@ class Organism:
 
 
             else:           
-                creature.pos_X = random.randint(config.TILE_WIDTH + 20,
-                                                config.universe_width - config.TILE_WIDTH - 20)
-                creature.pos_Y = random.randint(config.TILE_HEIGHT + 20,
-                                                config.universe_height - config.TILE_HEIGHT - 20)
+                creature.pos_X = random.randint(config.TILE_DIM + 20,
+                                                config.universe_width - config.TILE_DIM - 20)
+                creature.pos_Y = random.randint(config.TILE_DIM + 20,
+                                                config.universe_height - config.TILE_DIM - 20)
 
                                 
             if not isinstance(creature, Grass): 
@@ -216,10 +211,6 @@ class Organism:
 
 
 
-
-
-
-
     @classmethod
     def live(cls, population_list, food_list, creature_class):
    
@@ -227,6 +218,8 @@ class Organism:
             
             if creature.isAlive:
                 creature.move_creature()
+
+                creature.brain.debug()
 
                 # Step counter
                 creature.steps += 1
@@ -238,12 +231,16 @@ class Organism:
                 creature.hunger += 1
                 if creature.hunger >= creature.max_hunger_limit:                   
                     creature.death(population_list, "Hunger")
+                    continue #Continue to the next element after death, since 
+                             #creature gets removed from the list at this time
+                             #This can cause problems if more than one death condition is met
 
                 # Creature eats only when hungry
                 if creature.hunger > creature.again_hungry:
-                    eaten = game.isCollided(creature, food_list)
+                    eaten = creature.isCollided(food_list)
                     if eaten:
-                        cls.death(eaten, food_list, "Eaten") 
+                        cls.death(eaten, food_list, "Eaten")
+                        continue 
                         #Calling death() as a classmethod and passing the instance since 
                         #Grass class does not have a death() method
                         creature.hunger = 0
@@ -251,20 +248,20 @@ class Organism:
                 # Reproduction
                 if creature.gender == 'M' and creature.isAdult and creature.hunger <= creature.again_hungry: 
                     #Hunger > Reproductive urge
-                    mother = game.isCollided(creature, list(filter(lambda female: (
+                    mother = creature.isCollided(list(filter(lambda female: (
                             (female.gender == 'F' and not female.isPregnant) and
                             creature.isAdult), population_list)))
                     if mother:
                         mother.isPregnant = True
                         mother.partner = creature
-                        print(f"{creature_class.__name__} got pregnant")
+                        (f"{creature_class.__name__} got pregnant")
 
                 if creature.isPregnant:
                     creature.gestation_days += 1
 
                 if creature.isPregnant and creature.gestation_days == (
                         creature.gestation_period / 2):
-                    litter_size = random.randint(*creature.litter_size)
+                    litter_size = random.randint(*creature.litter_size_range)
                     cls.birth(creature_class, litter_size, population_list, creature)
 
                 if creature.gestation_days == creature.gestation_period:
@@ -277,6 +274,36 @@ class Organism:
                 # Death
                 if creature.age == creature.life_span:
                     creature.death(population_list, reason = "Age")
+                    continue
+
+
+    
+    class Brain:
+
+        def __init__(self,creature,  vision_radius = 125):
+
+            self.creature = creature
+            self.vision_radius = vision_radius
+            self.pos_X = int(self.creature.pos_X)
+            self.pos_Y = int(self.creature.pos_Y)
+            self.id = self.creature.id
+
+        @property
+        def view_matrix(self):
+            return Organism.universe_matrix[self.pos_X - self.vision_radius: self.pos_X + self.vision_radius, 
+                                       self.pos_Y - self.vision_radius: self.pos_Y + self.vision_radius]
+
+        def debug(self):
+            print(self.id, self.pos_X, self.pos_Y, self.view_matrix.shape)
+
+
+
+
+
+                           
+
+
+
 
 
 
@@ -290,7 +317,7 @@ class Rabbit(Organism):
         self.image_roaster_left = config.rabbit_image_left
         self.image_roaster_right = config.rabbit_image_right
 
-        self.litter_size = (5, 8)
+        self.litter_size_range = (5, 8)
         self.speed = random.uniform(1.0, 5.0)
         self.life_span = random.randint(150, 400) 
 
@@ -310,7 +337,7 @@ class Fox(Organism):
         self.image_roaster_left = config.fox_image_left
         self.image_roaster_right = config.fox_image_right
 
-        self.litter_size = (3, 6)
+        self.litter_size_range = (3, 6)
         self.speed = random.uniform(2.0, 4.0)
         self.life_span = random.randint(1200, 1500) 
 
@@ -319,3 +346,25 @@ class Fox(Organism):
 
         self.again_hungry = 150 
         self.max_hunger_limit = 500
+
+
+#Grass
+class Grass:
+    grass_list = []
+    def __init__(self):
+        self.pos_X = 0
+        self.pos_Y = 0
+        self.isAlive = True
+
+    # Grass generation every 40 days
+    def new_grass_generator():
+        
+        if config.days % 40 == 0:
+            new_grass_quantity = random.randint(20, 30)
+            Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
+
+    def grass_populator():
+        for grass in Grass.grass_list:
+            if grass.isAlive:
+                game.object_appear(config.grass_image, grass.pos_X, grass.pos_Y)
+

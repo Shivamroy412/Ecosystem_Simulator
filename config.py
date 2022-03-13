@@ -9,7 +9,7 @@ training = False
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 
 days = 0
-hunger_marker = False
+hunger_marker = True
 
 
 
@@ -57,15 +57,12 @@ map = [
 
 
 
-TILE_WIDTH = 64
-TILE_HEIGHT = 64
+TILE_DIM = 64
 
 map_tiles_list = []
 
-universe_height = int(len(map) * TILE_HEIGHT)
-universe_width = int(len(map[0]) * TILE_WIDTH)
-
-print(universe_width, universe_height)
+universe_height = int(len(map) * TILE_DIM)
+universe_width = int(len(map[0]) * TILE_DIM)
 
 print(universe_width, universe_height)
 

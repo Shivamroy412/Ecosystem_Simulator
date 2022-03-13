@@ -4,7 +4,6 @@ import game
 import map
 import statistics
 from organisms import *
-import brain
 
 
 # Initialize pygame
@@ -29,6 +28,9 @@ while config.game_running:
     population_label = label_font.render(f"Present Rabbit Population: {len(Rabbit.rabbit_list)}", 1, (0,0,0))
     game.screen.blit(population_label, (10, 10))
 
+    #Present Universe State
+    Organism.universe_matrix = game.Universe(Grass.grass_list, Rabbit.rabbit_list, Fox.fox_list).universe_matrix
+
     #Grass God
     Grass.grass_populator()
     Grass.new_grass_generator()
@@ -43,11 +45,6 @@ while config.game_running:
 
 
     
-
-    universe = brain.Universe(Grass.grass_list, Rabbit.rabbit_list, Fox.fox_list)
-    
-    if config.days > 1:
-        print(config.days, universe.universe_matrix.sum())
         
     
 
