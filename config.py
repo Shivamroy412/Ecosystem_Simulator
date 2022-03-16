@@ -9,7 +9,7 @@ training = False
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 
 days = 0
-hunger_marker = True
+hunger_marker = False
 
 
 
@@ -72,5 +72,10 @@ ground_land_image = pygame.image.load(os.path.join("img","map", "ground.png"))
 
 tile_image_mapping = {'Em': ground_land_image,
                       'Gm': grass_land_image,}
+
+
+#By what value are map edges represented in the matrices
+edge_value_in_matrix = -0.1 
+
 
 scroll_speed = 192

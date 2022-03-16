@@ -288,10 +288,36 @@ class Organism:
             self.pos_Y = int(self.creature.pos_Y)
             self.id = self.creature.id
 
+
         @property
         def view_matrix(self):
-            return Organism.universe_matrix[self.pos_X - self.vision_radius: self.pos_X + self.vision_radius, 
-                                       self.pos_Y - self.vision_radius: self.pos_Y + self.vision_radius]
+            # A complex logic had to be written for creatures wandering at the edges of the map
+            #since their vision would spill-over of the map screen
+
+            #Initialise the view_matrix with edge values
+            _view_matrix = np.full((2*self.vision_radius+1, 2*self.vision_radius+1), config.edge_value_in_matrix)
+
+            _universe_left = max(0,self.pos_X - self.vision_radius)
+            _universe_right = min(config.SCREEN_WIDTH-1, self.pos_X + self.vision_radius)
+            _universe_top = max(0, self.pos_Y - self.vision_radius)
+            _universe_bottom = min(config.SCREEN_HEIGHT-1,self.pos_Y + self.vision_radius)
+
+            #Dimensions of the part of the vision_matrix which overlaps the universe map
+            _overlap_matrix_width  = _universe_right - _universe_left + 1
+            _overlap_matrix_height = _universe_bottom - _universe_top + 1
+
+            #Slicing idices of the overlapping matrix
+            _overlap_left = (2*self.vision_radius+1)-_overlap_matrix_width if _universe_left == 0 else 0
+            _overlap_right = _overlap_matrix_width if _universe_right == (config.SCREEN_WIDTH-1) else (2*self.vision_radius+1)
+            _overlap_top = (2*self.vision_radius+1)- _overlap_matrix_height if _universe_top == 0 else 0
+            _overlap_bottom = _overlap_matrix_height if _universe_bottom == (config.SCREEN_HEIGHT-1) else (2*self.vision_radius+1)
+
+            #Slicing and specifying only the part of the vision matrix and universe that overlap
+            _view_matrix[_overlap_left:_overlap_right, _overlap_top:_overlap_bottom] = Organism.universe_matrix[
+                                                        _universe_left:_universe_right+1, _universe_top:_universe_bottom+1]
+
+
+            return _view_matrix
 
         def debug(self):
             print(self.id, self.pos_X, self.pos_Y, self.view_matrix.shape)

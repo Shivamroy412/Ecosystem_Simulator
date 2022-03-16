@@ -49,7 +49,7 @@ class Universe:
     @property
     def universe_matrix(self):
 
-        _matrix = np.full((self.universe_width, self.universe_height), fill_value = -0.1)    
+        _matrix = np.full((self.universe_width, self.universe_height), fill_value = config.edge_value_in_matrix)    
         #Initialize with -1 for edge values and then replace inner universe cells with zero
         for row in range(self.edge_tiles_dim, self.universe_width - self.edge_tiles_dim):
             for col in range(self.edge_tiles_dim, self.universe_height - self.edge_tiles_dim):
