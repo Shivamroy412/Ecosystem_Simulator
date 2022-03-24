@@ -4,7 +4,8 @@ import os
 
 # Game Specifications
 game_running = True
-training = False 
+
+reset_training = False 
 
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 

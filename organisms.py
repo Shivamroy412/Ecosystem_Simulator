@@ -41,11 +41,6 @@ class Organism:
         self.max_size_ratio = 1
         self.min_size_ratio = 0.35
 
-
-    @property 
-    def brain(self):
-        return Organism.Brain(creature = self)
-
     
     #Gradually increaes size of creature with age
     @property
@@ -55,6 +50,16 @@ class Organism:
     @property
     def img_intervals(self):
         return len(self.image_roaster_left) - 1    
+
+
+
+    # Neural Network AI
+    isIntelligent = True
+
+    if isIntelligent:
+        @property 
+        def brain(self):
+            return Organism.Brain(creature = self)
 
 
     # Kinetics
@@ -219,8 +224,6 @@ class Organism:
             if creature.isAlive:
                 creature.move_creature()
 
-                creature.brain.debug()
-
                 # Step counter
                 creature.steps += 1
 
@@ -277,16 +280,52 @@ class Organism:
                     continue
 
 
+                #Neural_Network 
+                if creature.isIntelligent: 
+
+                    creature.degree =  creature.brain.forward()   
+                    print(creature.id, creature.degree)
+
     
     class Brain:
 
-        def __init__(self,creature,  vision_radius = 125):
+        def __init__(self,creature,  vision_radius = 125, neurons_1 = 10, neurons_2 = 1):
 
             self.creature = creature
             self.vision_radius = vision_radius
+            
             self.pos_X = int(self.creature.pos_X)
             self.pos_Y = int(self.creature.pos_Y)
             self.id = self.creature.id
+
+            #Layer 1
+            self.neurons_1 = neurons_1
+
+            self.weight_1 = np.random.uniform(-1.0, 1.0, (self.vision_radius * 2 + 1, self.neurons_1))
+            self.bias_1 = np.random.uniform(-1.0, 1.0, (1, self.neurons_1))
+
+            #Layer 2
+            self.neurons_2 = neurons_2
+
+            self.weight_2 = np.random.uniform(-1.0, 1.0, (self.neurons_1, self.neurons_2))
+            self.bias_2 = np.random.uniform(-1.0, 1.0, (1, self.neurons_2))
+
+
+        def forward(self):
+
+            #Multiplying weight and adding bias in Layer 1
+            output = np.dot(self.view_matrix, self.weight_1) + self.bias_1 #Dim (vision_radius, neurons_1)
+
+            #Activation function RelU
+            output = np.maximum(0, output)   #Dim (vision_radius, neurons_1)
+
+            #Multiplying weights and biases in Layer 2
+            output = np.dot(output, self.weight_2) + self.bias_2   #Dim (vision_radius, neurons_2)
+
+            #Activation function Sigmoid
+            output = 1.0/(1.0 + np.exp(-output))
+
+            return np.mean(output) * 360
 
 
         @property
@@ -319,24 +358,12 @@ class Organism:
 
             return _view_matrix
 
-        def debug(self):
-            print(self.id, self.pos_X, self.pos_Y, self.view_matrix.shape)
-
-
-
-
-
-                           
-
-
-
-
-
 
 
 # Rabbit
 class Rabbit(Organism):
     rabbit_list = []
+    isIntelligent = True
     def __init__(self):
         super().__init__()
         
@@ -357,6 +384,8 @@ class Rabbit(Organism):
 #Fox
 class Fox(Organism):
     fox_list = []
+    isIntelligent = False
+
     def __init__(self):
         super().__init__()
 
