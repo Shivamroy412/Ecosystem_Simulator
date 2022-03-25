@@ -7,6 +7,9 @@ import numpy as np
 
 class Organism:
 
+    #Neural Network AI
+    isIntelligent = None
+
     def __init__(self):
         self.id = 0
         self.pos_X = 0
@@ -22,6 +25,7 @@ class Organism:
         self.partner = None
         self.mother = None
         self.father = None
+        self.generation = 0
 
         self.isPregnant = False
         self.gestation_days = 0
@@ -33,7 +37,7 @@ class Organism:
         self.degree = random.randint(0, 360) 
 
         self.hunger = 0
-        self.again_hungry = 50 
+        self.again_hungry = 0 #Creature keeps eating since training 
         self.max_hunger_limit = 150
         
         self.litter_size_range = (3, 5)
@@ -41,7 +45,10 @@ class Organism:
         self.max_size_ratio = 1
         self.min_size_ratio = 0.35
 
+        self.fitness = 0.0
+
     
+
     #Gradually increaes size of creature with age
     @property
     def size_ratio(self):
@@ -49,17 +56,14 @@ class Organism:
         
     @property
     def img_intervals(self):
-        return len(self.image_roaster_left) - 1    
+        return len(self.image_roaster_left) - 1  
 
-
-
-    # Neural Network AI
-    isIntelligent = True
-
-    if isIntelligent:
-        @property 
-        def brain(self):
+    @property 
+    def brain(self):
+        if self.isIntelligent:
             return Organism.Brain(creature = self)
+        else:
+            return None
 
 
     # Kinetics
@@ -67,7 +71,7 @@ class Organism:
         creature = self
 
         # Changes direction after every 30 steps
-        if self.steps % 2 == 0:
+        if self.steps % 30 == 0 and not self.isIntelligent:
             creature.degree = random.randint(0, 360)
 
         if 90 < creature.degree <= 180:
@@ -118,6 +122,11 @@ class Organism:
 
         # Reverses direction
         def reverse(creature):
+            
+            creature.fitness += config.edge_score
+            #A creature reverses only upon going on the edge, discouraging it to 
+            # move towards the edge with a slight penalty
+
             if creature.degree < 180:
                 creature.degree += 180
             else:
@@ -169,9 +178,12 @@ class Organism:
             creature = creature_class()
             creature.id = i
             
+            #When the parents were already present in the universe, that is, not pioneers
             if self:
                 creature.mother = self
                 creature.father = self.partner
+
+                creature.generation = max(creature.mother.generation, creature.father.generation) + 1
 
                 #Below traits are alreay assigned on birth, however this should be considered as a mutation
                 #The creature has a 45%-45% chance of inheriting these traits from either parents and 10% 
@@ -187,6 +199,7 @@ class Organism:
                 creature.pos_Y = creature.mother.pos_Y
 
 
+            #Pioneer population
             else:           
                 creature.pos_X = random.randint(config.TILE_DIM + 20,
                                                 config.universe_width - config.TILE_DIM - 20)
@@ -194,22 +207,20 @@ class Organism:
                                                 config.universe_height - config.TILE_DIM - 20)
 
                                 
-            if not isinstance(creature, Grass): 
-                pass
-                #print("Birth happened: The present population is {}".format(present_population))
-                
+
                 
                 
             
             creature_population.append(creature)
  
 
-
+    dead_list = []
 
     def death(self, population_list: list, reason = None):
 
         if not isinstance(self, Grass):
             self.reason_of_death = reason
+            Organism.dead_list.append(self)
 
         self.isAlive = False
         population_list.remove(self)
@@ -232,32 +243,56 @@ class Organism:
 
                 # Hunger Counter
                 creature.hunger += 1
-                if creature.hunger >= creature.max_hunger_limit:                   
+                if creature.hunger >= creature.max_hunger_limit:
+                    
+                    creature.fitness += config.dies_of_hunger_score
+                    #Crearure couldn't find food, however there might be shortage of food, hence not
+                    # the heaviest penalty
+
                     creature.death(population_list, "Hunger")
                     continue #Continue to the next element after death, since 
                              #creature gets removed from the list at this time
                              #This can cause problems if more than one death condition is met
 
-                # Creature eats only when hungry
+                # Creature eats only when hungry, this has been made 0 while training
                 if creature.hunger > creature.again_hungry:
                     eaten = creature.isCollided(food_list)
                     if eaten:
+
+                        creature.fitness += config.eat_score #Eating is an essential activity
+
+                        creature.hunger = 0
+
+                        if not isinstance(eaten, Grass):
+                            eaten.fitness = config.eaten_death_score #Got eaten
+
                         cls.death(eaten, food_list, "Eaten")
                         continue 
                         #Calling death() as a classmethod and passing the instance since 
                         #Grass class does not have a death() method
-                        creature.hunger = 0
+                        
 
                 # Reproduction
-                if creature.gender == 'M' and creature.isAdult and creature.hunger <= creature.again_hungry: 
-                    #Hunger > Reproductive urge
+                if creature.gender == 'M' and creature.isAdult: 
+                    
                     mother = creature.isCollided(list(filter(lambda female: (
                             (female.gender == 'F' and not female.isPregnant) and
                             creature.isAdult), population_list)))
+
                     if mother:
                         mother.isPregnant = True
                         mother.partner = creature
                         (f"{creature_class.__name__} got pregnant")
+
+                    # Since at present we don't show the above traits required to be a mother
+                    # only herding tendencies can also be rewarded as it encourages mating
+                    female_nearby =  creature.isCollided(list(filter(lambda female: 
+                            female.gender == 'F', population_list)))
+
+                    # Mating would acquire a high fitness score
+                    if female_nearby:
+                        creature.fitness        += config.mating_score
+                        female_nearby.fitness   += config.mating_score
 
                 if creature.isPregnant:
                     creature.gestation_days += 1
@@ -283,13 +318,16 @@ class Organism:
                 #Neural_Network 
                 if creature.isIntelligent: 
 
+                    print(creature.id, creature.degree,  creature.pos_X, creature.pos_Y)
                     creature.degree =  creature.brain.forward()   
-                    print(creature.id, creature.degree)
+                    
 
     
     class Brain:
 
-        def __init__(self,creature,  vision_radius = 125, neurons_1 = 10, neurons_2 = 1):
+        universe_matrix = None
+
+        def __init__(self, creature,  vision_radius = 125, neurons_1 = 10, neurons_2 = 1):
 
             self.creature = creature
             self.vision_radius = vision_radius
@@ -352,7 +390,7 @@ class Organism:
             _overlap_bottom = _overlap_matrix_height if _universe_bottom == (config.SCREEN_HEIGHT-1) else (2*self.vision_radius+1)
 
             #Slicing and specifying only the part of the vision matrix and universe that overlap
-            _view_matrix[_overlap_left:_overlap_right, _overlap_top:_overlap_bottom] = Organism.universe_matrix[
+            _view_matrix[_overlap_left:_overlap_right, _overlap_top:_overlap_bottom] = self.universe_matrix[
                                                         _universe_left:_universe_right+1, _universe_top:_universe_bottom+1]
 
 
@@ -363,7 +401,9 @@ class Organism:
 # Rabbit
 class Rabbit(Organism):
     rabbit_list = []
+
     isIntelligent = True
+
     def __init__(self):
         super().__init__()
         
@@ -371,8 +411,8 @@ class Rabbit(Organism):
         self.image_roaster_right = config.rabbit_image_right
 
         self.litter_size_range = (5, 8)
-        self.speed = random.uniform(1.0, 5.0)
-        self.life_span = random.randint(150, 400) 
+        self.speed = random.uniform(3.0, 8.0)
+        self.life_span = random.randint(1500, 4000) 
 
         self.max_size_ratio = 0.85
         self.min_size_ratio = 0.35
@@ -381,9 +421,11 @@ class Rabbit(Organism):
         self.max_hunger_limit = 250
 
 
+
 #Fox
 class Fox(Organism):
     fox_list = []
+
     isIntelligent = False
 
     def __init__(self):
@@ -401,6 +443,8 @@ class Fox(Organism):
 
         self.again_hungry = 150 
         self.max_hunger_limit = 500
+
+
 
 
 #Grass

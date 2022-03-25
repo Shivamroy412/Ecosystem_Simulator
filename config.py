@@ -5,12 +5,21 @@ import os
 # Game Specifications
 game_running = True
 
-reset_training = False 
+initial_training = False 
 
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 
 days = 0
 hunger_marker = False
+
+evolution = 0
+
+#Fitness scores
+edge_score = -1.0
+dies_of_hunger_score = -30.0
+eat_score = 50.0
+eaten_death_score = -100.0
+mating_score = 100.0
 
 
 
@@ -42,8 +51,7 @@ grass_initial_quantity = 80
 
 
 # Map
-map = [
-    ['Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em'],
+map = [[  'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em',  'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em', 'Em'],
     ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
     ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],
     ['Em', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Gm', 'Em'],

@@ -12,11 +12,6 @@ pygame.display.set_caption("Ecosystem Simulator")
 #Label Font
 label_font = pygame.font.SysFont("Calibri", 20)
 
-#Pioneer Population
-Organism.birth(Grass, config.grass_initial_quantity, Grass.grass_list)
-Organism.birth(Rabbit, config.rabbit_initial_N, Rabbit.rabbit_list)
-Organism.birth(Fox, config.fox_initial_N, Fox.fox_list)
-
 
 # Game_Loop
 
@@ -35,16 +30,28 @@ while config.game_running:
     Grass.grass_populator()
     Grass.new_grass_generator()
 
+    if not Rabbit.rabbit_list or not Fox.fox_list:
+
+        Organism.birth(Rabbit, config.rabbit_initial_N, Rabbit.rabbit_list)
+        Organism.birth(Fox, config.fox_initial_N, Fox.fox_list)
+
+        if config.days == 0:
+            Organism.birth(Grass, config.grass_initial_quantity, Grass.grass_list)
+
+        config.evolution += 1
+        config.days = 0 #This has to be defined here to reset days counter when new evolution occurs,
+                        #while avoiding the new generation of pioneer Grass as defined in above condition
+
+   
+    Organism.Brain.universe_matrix = game.Universe().universe_matrix
+
     #Rabbit God
     Rabbit.live(population_list= Rabbit.rabbit_list,
               food_list=Grass.grass_list, creature_class=Rabbit)
 
     #Fox God
     Fox.live(population_list=Fox.fox_list, 
-            food_list=Rabbit.rabbit_list, creature_class=Fox)
-
-
-    
+            food_list=Rabbit.rabbit_list, creature_class=Fox)  
         
     
 
