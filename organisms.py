@@ -7,15 +7,20 @@ import numpy as np
 
 class Organism:
 
+    number_of_creatures = 0
+    dead_list = []
     #Neural Network AI
     isIntelligent = None
 
     def __init__(self):
-        self.id = 0
-        self.pos_X = 0
-        self.pos_Y = 0
+        self.id = ""
+        self.pos_X = random.randint(config.TILE_DIM + 20,
+                                    config.universe_width - config.TILE_DIM - 20)
+        self.pos_Y = random.randint(config.TILE_DIM + 20,
+                                    config.universe_height - config.TILE_DIM - 20)
         self.image_roaster_left = []
         self.image_roaster_right = []
+
         self.age = 0
         self.gender = 'M' if random.random() < 0.45 else 'F' # Slightly biased towards generating more females
         self.isAlive = True
@@ -174,12 +179,16 @@ class Organism:
    
         present_population = len(creature_population)
 
-        for i in range(present_population, present_population + creature_quantity):
+        for _ in range(present_population, present_population + creature_quantity):
+            
             creature = creature_class()
-            creature.id = i
             
             #When the parents were already present in the universe, that is, not pioneers
             if self:
+                #This condition implies that the creatures mated and therefore the mother creature
+                #called this function. This would also mean that the inheritance of traits can be 
+                #done through the the parent creatures already present in the simulation.
+                
                 creature.mother = self
                 creature.father = self.partner
 
@@ -198,23 +207,21 @@ class Organism:
                 creature.pos_X = creature.mother.pos_X 
                 creature.pos_Y = creature.mother.pos_Y
 
-
-            #Pioneer population
-            else:           
-                creature.pos_X = random.randint(config.TILE_DIM + 20,
-                                                config.universe_width - config.TILE_DIM - 20)
-                creature.pos_Y = random.randint(config.TILE_DIM + 20,
-                                                config.universe_height - config.TILE_DIM - 20)
-
+            else:
+                #This condition would imply that new creatures need to be formed and this is the start of the
+                #simulation or the next evolution and there would be a pioneer population created.
+                pass
                                 
 
+            if not isinstance(creature, Grass):
                 
-                
+                creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
+
+                creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
+                    
             
             creature_population.append(creature)
- 
 
-    dead_list = []
 
     def death(self, population_list: list, reason = None):
 
@@ -417,8 +424,8 @@ class Rabbit(Organism):
         self.max_size_ratio = 0.85
         self.min_size_ratio = 0.35
 
-        self.again_hungry = 50 
-        self.max_hunger_limit = 250
+        self.again_hungry = 0 #zero since training 
+        self.max_hunger_limit = 500
 
 
 
@@ -441,7 +448,7 @@ class Fox(Organism):
         self.max_size_ratio = 1.0
         self.min_size_ratio = 0.6
 
-        self.again_hungry = 150 
+        self.again_hungry = 150  #zero since training
         self.max_hunger_limit = 500
 
 
@@ -451,15 +458,17 @@ class Fox(Organism):
 class Grass:
     grass_list = []
     def __init__(self):
-        self.pos_X = 0
-        self.pos_Y = 0
+        self.pos_X = random.randint(config.TILE_DIM + 20,
+                                    config.universe_width - config.TILE_DIM - 20)
+        self.pos_Y = random.randint(config.TILE_DIM + 20,
+                                    config.universe_height - config.TILE_DIM - 20)
         self.isAlive = True
 
     # Grass generation every 40 days
     def new_grass_generator():
         
         if config.days % 40 == 0:
-            new_grass_quantity = random.randint(20, 30)
+            new_grass_quantity = random.randint(40, 70)
             Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
 
     def grass_populator():
