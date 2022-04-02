@@ -71,6 +71,17 @@ class Organism:
             return None
 
 
+    #The below parameter trait is alreay assigned on birth,however this should be considered as a 
+    #mutation as it is random, The creature has a (1-mutation_chance)/2% chance of inheriting this 
+    #trait from either parents and (mutation_chance)% through mutation
+    def inheritance(self, trait, mutation_chance = 0.1):
+        return random.choices([getattr(self.mother, trait), getattr(self.father, trait), 
+                              getattr(self, trait)], 
+                              [(1.0-mutation_chance)/2.0, (1.0-mutation_chance)/2.0, 
+                              mutation_chance],k=1)[0]
+                              # [0] since it returns a list
+
+
     # Kinetics
     def move_creature(self):
         creature = self
@@ -194,14 +205,9 @@ class Organism:
 
                 creature.generation = max(creature.mother.generation, creature.father.generation) + 1
 
-                #Below traits are alreay assigned on birth, however this should be considered as a mutation
-                #The creature has a 45%-45% chance of inheriting these traits from either parents and 10% 
-                # through mutation
-                creature.speed = random.choices([creature.father.speed, creature.mother.speed, creature.speed], 
-                                                cum_weights= [0.45, 0.45, 0.1], k = 1)[0] #choices() returns a list
-                creature.life_span = random.choices([creature.father.life_span, creature.mother.life_span, 
-                                                    creature.life_span], cum_weights= [0.45, 0.45, 0.1], k = 1)[0]
-
+                #Since trait is an attribute it has to be passed as a string
+                creature.speed = creature.inheritance("speed", 0.1)
+                creature.life_span = creature.inheritance("life_span", 0.1)
 
                 #New rabbits spawn near mother
                 creature.pos_X = creature.mother.pos_X 
@@ -325,7 +331,7 @@ class Organism:
                 #Neural_Network 
                 if creature.isIntelligent: 
 
-                    print(creature.id, creature.degree,  creature.pos_X, creature.pos_Y)
+                    #print(creature.id, creature.degree,  creature.pos_X, creature.pos_Y)
                     creature.degree =  creature.brain.forward()   
                     
 
