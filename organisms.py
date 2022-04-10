@@ -366,7 +366,7 @@ class Organism:
 
         universe_matrix = None
 
-        def __init__(self, creature,  vision_radius = 125, neurons_1 = 10, neurons_2 = 1):
+        def __init__(self, creature,  vision_radius = 125, neurons_1 = 360, neurons_2 = 360):
 
             self.creature = creature
             self.vision_radius = vision_radius
@@ -393,16 +393,23 @@ class Organism:
             #Multiplying weight and adding bias in Layer 1
             output = np.dot(self.view_matrix, self.weight_1) + self.bias_1 #Dim (vision_radius, neurons_1)
 
+            print("Start")
+            print(output.shape)
+
             #Activation function RelU
             output = np.maximum(0.2*output, output)   #Dim (vision_radius, neurons_1)
+            print(output.shape)
 
             #Multiplying weights and biases in Layer 2
             output = np.dot(output, self.weight_2) + self.bias_2   #Dim (vision_radius, neurons_2)
+            print(output.shape)
 
             #Activation function Sigmoid
             output = 1.0/(1.0 + np.exp(-output))
+            output = np.mean(output, axis = 0)
+            print(output.shape)
 
-            return np.mean(output) * 360
+            return np.argmax(output)
 
 
         @property
