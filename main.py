@@ -4,6 +4,7 @@ import game
 import map
 import statistics
 from organisms import *
+import numpy as np
 
 
 # Initialize pygame
@@ -54,6 +55,9 @@ while config.game_running:
             food_list=Rabbit.rabbit_list, creature_class=Fox)  
         
     
+    #Debugging all creatures accumulating to the left
+    #print(np.mean([rabbit.degree for rabbit in Rabbit.rabbit_list]))
+
 
     # Days counter
     config.days += 1

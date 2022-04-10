@@ -74,12 +74,34 @@ class Organism:
     #The below parameter trait is alreay assigned on birth,however this should be considered as a 
     #mutation as it is random, The creature has a (1-mutation_chance)/2% chance of inheriting this 
     #trait from either parents and (mutation_chance)% through mutation
-    def inheritance(self, trait, mutation_chance = 0.1):
-        return random.choices([getattr(self.mother, trait), getattr(self.father, trait), 
-                              getattr(self, trait)], 
-                              [(1.0-mutation_chance)/2.0, (1.0-mutation_chance)/2.0, 
-                              mutation_chance],k=1)[0]
-                              # [0] since it returns a list
+    def inheritance(self, trait = "brain", mutation_chance = 0.1):
+
+        parent_chance = (1.0-mutation_chance)/2.0
+
+        def brain_inherit(mother_gene, father_gene, mutation_gene):
+            return random.choices([mother_gene, father_gene, mutation_gene], 
+                    [parent_chance, parent_chance, mutation_chance], k=1)[0]
+
+        genomes = ["weight_1", "bias_1", "weight_2", "bias_2"]
+
+        #If trait is equal to brain it means inheriting weights and biases from parents
+        if trait == "brain":
+            for genome in genomes:
+                genome_shape = getattr(self.brain, genome).shape
+                brain_trait = [brain_inherit(mother_gene, father_gene, mutation_gene)
+                                for mother_gene, father_gene, mutation_gene in 
+                                zip(getattr(self.mother.brain, genome).ravel(), 
+                                getattr(self.father.brain, genome).ravel(),
+                                getattr(self.brain, genome).ravel())]
+
+                #For brain attributes, there is None value returned and the traits are set through the function 
+                setattr(self.brain, genome, np.array(brain_trait).reshape(genome_shape))
+        else:    
+            return random.choices([getattr(self.mother, trait), getattr(self.father, trait), 
+                                getattr(self, trait)], 
+                                [parent_chance, parent_chance, 
+                                mutation_chance],k=1)[0]
+                                # [0] since it returns a list
 
 
     # Kinetics
@@ -209,7 +231,15 @@ class Organism:
                 creature.speed = creature.inheritance("speed", 0.1)
                 creature.life_span = creature.inheritance("life_span", 0.1)
 
-                #New rabbits spawn near mother
+                #Inherting neural network weights and biases, "brain" argument would return None
+                if creature.isIntelligent:
+                    creature.inheritance("brain", 0.1)
+
+                    # Debugging
+                    # print(creature.brain.bias_2.sum(), creature.mother.brain.bias_2.sum(),  
+                    #         creature.father.brain.bias_2.sum(), creature.id)
+
+                #New offsrpings spawn near mother
                 creature.pos_X = creature.mother.pos_X 
                 creature.pos_Y = creature.mother.pos_Y
 
@@ -222,10 +252,8 @@ class Organism:
             if not isinstance(creature, Grass):
                 
                 creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
-
                 creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
                     
-            
             creature_population.append(creature)
 
 
@@ -330,8 +358,6 @@ class Organism:
 
                 #Neural_Network 
                 if creature.isIntelligent: 
-
-                    #print(creature.id, creature.degree,  creature.pos_X, creature.pos_Y)
                     creature.degree =  creature.brain.forward()   
                     
 
@@ -368,7 +394,7 @@ class Organism:
             output = np.dot(self.view_matrix, self.weight_1) + self.bias_1 #Dim (vision_radius, neurons_1)
 
             #Activation function RelU
-            output = np.maximum(0, output)   #Dim (vision_radius, neurons_1)
+            output = np.maximum(0.2*output, output)   #Dim (vision_radius, neurons_1)
 
             #Multiplying weights and biases in Layer 2
             output = np.dot(output, self.weight_2) + self.bias_2   #Dim (vision_radius, neurons_2)

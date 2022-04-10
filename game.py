@@ -34,8 +34,8 @@ class Universe:
 
         self.day = config.days 
 
-        self.creature_mapping = {'Grass': 1.0, 'RabbitM': 2.0, 'RabbitF' : 3.0, 
-                                 'FoxM': 4.0, 'FoxF': 5.0}
+        self.creature_mapping = {'Grass': 0.1, 'RabbitM': 0.2, 'RabbitF' : 0.3, 
+                                 'FoxM': 0.8, 'FoxF': 0.9}
 
         self.all_elements = list(chain(*all_creature_lists))
         #Python logic for the above line of code:
