@@ -31,7 +31,20 @@ while config.game_running:
     Grass.grass_populator()
     Grass.new_grass_generator()
 
-    if not Rabbit.rabbit_list or not Fox.fox_list:
+
+    # Population explosion kills all animals and jumps to next generation
+    # or when either Rabbits or Foxes are extinct or the System is started initially 
+    if len(Rabbit.rabbit_list) >= config.population_limit or len(Fox.fox_list) >= config.population_limit \
+         or not Rabbit.rabbit_list or not Fox.fox_list:
+        
+        Organism.dead_list.extend(Rabbit.rabbit_list)
+        Rabbit.rabbit_list = []
+        Organism.dead_list.extend(Fox.fox_list)
+        Fox.fox_list = []
+
+        if config.days > 0:
+            Organism.save_fittest_creatures(Rabbit)
+        
 
         Organism.birth(Rabbit, config.rabbit_initial_N, Rabbit.rabbit_list)
         Organism.birth(Fox, config.fox_initial_N, Fox.fox_list)
@@ -44,6 +57,9 @@ while config.game_running:
                         #while avoiding the new generation of pioneer Grass as defined in above condition
 
    
+    #This is defining the universal state of the simulation as a matrix
+    #Every intelligent creature then gets a slice from the Universal matrix based
+    #on their position in the universe along with the radius of their vision
     Organism.Brain.universe_matrix = game.Universe().universe_matrix
 
     #Rabbit God
@@ -53,10 +69,6 @@ while config.game_running:
     #Fox God
     Fox.live(population_list=Fox.fox_list, 
             food_list=Rabbit.rabbit_list, creature_class=Fox)  
-        
-    
-    #Debugging all creatures accumulating to the left
-    #print(np.mean([rabbit.degree for rabbit in Rabbit.rabbit_list]))
 
 
     # Days counter

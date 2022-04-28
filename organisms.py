@@ -4,6 +4,8 @@ import game
 import math
 import pygame
 import numpy as np
+import pickle
+import os
 
 class Organism:
 
@@ -359,7 +361,58 @@ class Organism:
                 #Neural_Network 
                 if creature.isIntelligent: 
                     creature.degree =  creature.brain.forward()   
+
+    @staticmethod
+    def save_fittest_creatures(creature_class):
+
+        #This is done to handle the case of manually closing the simulation, 
+        #since manually closing would mean that all creatures are not in dead_list
+        Organism.dead_list.extend(Rabbit.rabbit_list)
+
+        if creature_class.isIntelligent:
+
+            fittest_male = creature_class()
+            fittest_female = creature_class()
+            fittest_male.gender, fittest_female.gender = 'M', 'F'
+
+            for creature in Organism.dead_list:
+
+                if isinstance(creature, creature_class):
+
+                    if creature.gender == 'M' and creature.fitness > fittest_male.fitness:
+                        fittest_male = creature
+
+                    if creature.gender == 'F' and creature.fitness > fittest_female.fitness:
+                        fittest_female = creature
+
+            #Since images can't be pickled, hence removing image_roasters
+            fittest_male.image_roaster_left, fittest_male.image_roaster_right = [], []
+            fittest_female.image_roaster_left, fittest_female.image_roaster_right = [], []
+            
+            #Creating detailed filenames
+            fittest_male_file_name = "Male_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_male.generation) \
+            + "_Fit_" + str(int(fittest_male.fitness)) + ".pickle" 
+
+            fittest_male_file_name = os.path.join('model', fittest_male_file_name)
+
+            #Saving the fittest creatures
+            with open(fittest_male_file_name, 'wb') as male_file:
+                pickle.dump(fittest_male, male_file)
+
+            fittest_female_file_name = "Female_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_female.generation) \
+            + "_Fit_" + str(int(fittest_female.fitness)) + ".pickle" 
+
+            fittest_female_file_name = os.path.join('model', fittest_female_file_name)
+
+            with open(fittest_female_file_name, 'wb') as female_file:
+                pickle.dump(fittest_female, female_file)
+
+                                     
                     
+
+
+
+        pass                
 
     
     class Brain:
@@ -367,6 +420,8 @@ class Organism:
         universe_matrix = None
 
         def __init__(self, creature,  vision_radius = 125, neurons_1 = 360, neurons_2 = 360):
+
+            #Change initial_training in config to True if you change the neural network architecture
 
             self.creature = creature
             self.vision_radius = vision_radius
@@ -393,21 +448,15 @@ class Organism:
             #Multiplying weight and adding bias in Layer 1
             output = np.dot(self.view_matrix, self.weight_1) + self.bias_1 #Dim (vision_radius, neurons_1)
 
-            print("Start")
-            print(output.shape)
-
             #Activation function RelU
             output = np.maximum(0.2*output, output)   #Dim (vision_radius, neurons_1)
-            print(output.shape)
 
             #Multiplying weights and biases in Layer 2
             output = np.dot(output, self.weight_2) + self.bias_2   #Dim (vision_radius, neurons_2)
-            print(output.shape)
 
             #Activation function Sigmoid
             output = 1.0/(1.0 + np.exp(-output))
             output = np.mean(output, axis = 0)
-            print(output.shape)
 
             return np.argmax(output)
 
@@ -489,8 +538,6 @@ class Fox(Organism):
 
         self.again_hungry = 150  #zero since training
         self.max_hunger_limit = 500
-
-
 
 
 #Grass

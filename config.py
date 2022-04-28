@@ -5,6 +5,8 @@ import os
 # Game Specifications
 game_running = True
 
+#Change initial_training to True if you change the neural network architecture
+#or if you wish to start training from scratch and not leverage pre-trained weights
 initial_training = False 
 
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
@@ -20,6 +22,7 @@ dies_of_hunger_score = -30.0
 eat_score = 50.0
 eaten_death_score = -100.0
 mating_score = 100.0
+population_limit = 80
 
 
 
