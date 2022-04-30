@@ -1,6 +1,5 @@
 import config
 import pygame
-import statistics
 import map
 from itertools import chain
 import numpy as np
@@ -65,34 +64,27 @@ class Universe:
         return _matrix
 
 
-
-
-
-
-
-
-
+# The code below is for larger maps which do not fit the screen and therefore the user can navigate
+# around the map using the arrow keys. The map can be expanded through the 'map' array in the config module.
+# However, it is suggested not to do that, since a lot of manual typing needs to be done and to be done in a 
+# correct way to avoid bugs.
 
 # Handle Events
-def handle_events():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            config.game_running = False
-            statistics.print_stats()
+# def handle_events():
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        if map.x_pos_map < 0:
-            map.x_pos_map += config.scroll_speed
+#     keys = pygame.key.get_pressed()
+#     if keys[pygame.K_LEFT]:
+#         if map.x_pos_map < 0:
+#             map.x_pos_map += config.scroll_speed
 
-    if keys[pygame.K_RIGHT]:
-        if map.x_pos_map > config.SCREEN_WIDTH - config.universe_width:
-            map.x_pos_map -= config.scroll_speed
+#     if keys[pygame.K_RIGHT]:
+#         if map.x_pos_map > config.SCREEN_WIDTH - config.universe_width:
+#             map.x_pos_map -= config.scroll_speed
 
-    if keys[pygame.K_UP]:
-        if map.y_pos_map < 0:
-            map.y_pos_map += config.scroll_speed
+#     if keys[pygame.K_UP]:
+#         if map.y_pos_map < 0:
+#             map.y_pos_map += config.scroll_speed
 
-    if keys[pygame.K_DOWN]:
-        if map.y_pos_map > config.SCREEN_HEIGHT - config.universe_height:
-            map.y_pos_map -= config.scroll_speed
+#     if keys[pygame.K_DOWN]:
+#         if map.y_pos_map > config.SCREEN_HEIGHT - config.universe_height:
+#             map.y_pos_map -= config.scroll_speed

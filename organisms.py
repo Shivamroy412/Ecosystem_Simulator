@@ -218,14 +218,32 @@ class Organism:
             
             creature = creature_class()
             
-            #When the parents were already present in the universe, that is, not pioneers
-            if self:
-                #This condition implies that the creatures mated and therefore the mother creature
-                #called this function. This would also mean that the inheritance of traits can be 
-                #done through the the parent creatures already present in the simulation.
+            
+            if self or ((len(os.listdir('model')) == 2) and isinstance(creature, Rabbit)):
                 
-                creature.mother = self
-                creature.father = self.partner
+                #When the parents were already present in the universe, that is, not pioneers
+                if self:
+                    #This condition implies that the creatures mated and therefore the mother creature
+                    #called this function. This would also mean that the inheritance of traits can be 
+                    #done through the parent creatures already present in the simulation.
+                    
+                    creature.mother = self
+                    creature.father = self.partner
+
+                else:
+                    #Only intelligent creatures (Rabbits) would have models saved
+
+                    for model in os.listdir('model'):
+                        if model.startswith("Male"):
+                            father_file_name = os.path.join('model', model)
+                            with open(father_file_name, 'rb') as father_file:
+                                creature.father = pickle.load(father_file)
+
+                        if model.startswith("Female"):
+                            mother_file_name = os.path.join('model', model)
+                            with open(mother_file_name, 'rb') as mother_file:
+                                creature.mother = pickle.load(mother_file)
+
 
                 creature.generation = max(creature.mother.generation, creature.father.generation) + 1
 
@@ -241,20 +259,14 @@ class Organism:
                     # print(creature.brain.bias_2.sum(), creature.mother.brain.bias_2.sum(),  
                     #         creature.father.brain.bias_2.sum(), creature.id)
 
-                #New offsrpings spawn near mother
-                creature.pos_X = creature.mother.pos_X 
-                creature.pos_Y = creature.mother.pos_Y
-
-            else:
-                #This condition would imply that new creatures need to be formed and this is the start of the
-                #simulation or the next evolution and there would be a pioneer population created.
-                pass
-                                
-
-            if not isinstance(creature, Grass):
+                if config.spawn_near_mother:
+                    # New offsrpings spawn near mother for aesthetic purposes
+                    # This does not bode well when training models
+                    creature.pos_X = creature.mother.pos_X 
+                    creature.pos_Y = creature.mother.pos_Y
                 
-                creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
-                creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
+            creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
+            creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
                     
             creature_population.append(creature)
 
@@ -362,12 +374,27 @@ class Organism:
                 if creature.isIntelligent: 
                     creature.degree =  creature.brain.forward()   
 
+    
+    @staticmethod
+    def get_fitness_of_saved_creatures():
+        if len(os.listdir('model')) == 2:
+            for model in os.listdir('model'):
+                if model.startswith("Male"):
+                    fitness_male = int(model.split("_Fit_")[1].split(".")[0])
+                elif model.startswith("Female"):
+                    fitness_female = int(model.split("_Fit_")[1].split(".")[0])
+                else:
+                    print("Error: Model file names should start with either Male or Female")
+
+            return fitness_male, fitness_female
+
+        else:
+            print("Error: model folder should only have 2 files")
+            return 0, 0  
+    
+    
     @staticmethod
     def save_fittest_creatures(creature_class):
-
-        #This is done to handle the case of manually closing the simulation, 
-        #since manually closing would mean that all creatures are not in dead_list
-        Organism.dead_list.extend(Rabbit.rabbit_list)
 
         if creature_class.isIntelligent:
 
@@ -385,34 +412,51 @@ class Organism:
                     if creature.gender == 'F' and creature.fitness > fittest_female.fitness:
                         fittest_female = creature
 
+            #Loads current saved fitness' of the creatures
+            current_fitness_male , current_fitness_female = Organism.get_fitness_of_saved_creatures()
+
+            print("Current", current_fitness_male, current_fitness_female)
+            print("Evol", config.evolution, fittest_male.fitness, fittest_female.fitness)
+            
             #Since images can't be pickled, hence removing image_roasters
             fittest_male.image_roaster_left, fittest_male.image_roaster_right = [], []
             fittest_female.image_roaster_left, fittest_female.image_roaster_right = [], []
+
+            fittest_male.partner = fittest_male.mother = fittest_male.father = None
+            fittest_female.partner = fittest_female.mother = fittest_female.father = None
             
-            #Creating detailed filenames
-            fittest_male_file_name = "Male_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_male.generation) \
-            + "_Fit_" + str(int(fittest_male.fitness)) + ".pickle" 
+            #Saves fittest_male in this evolution only if its fitness is greater than saved fitness
+            if fittest_male.fitness > current_fitness_male:
+                #Creating detailed filenames
+                fittest_male_file_name = "Male_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_male.generation) \
+                + "_Fit_" + str(int(fittest_male.fitness)) + ".pickle" 
 
-            fittest_male_file_name = os.path.join('model', fittest_male_file_name)
+                fittest_male_file_name = os.path.join('model', fittest_male_file_name)
 
-            #Saving the fittest creatures
-            with open(fittest_male_file_name, 'wb') as male_file:
-                pickle.dump(fittest_male, male_file)
+                #Delete current model to reduce and complications
+                for model in os.listdir('model'):
+                    if model.startswith('Male'):
+                        os.remove(os.path.join('model', model))
 
-            fittest_female_file_name = "Female_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_female.generation) \
-            + "_Fit_" + str(int(fittest_female.fitness)) + ".pickle" 
+                #Saving the fittest creatures
+                with open(fittest_male_file_name, 'wb') as male_file:
+                    pickle.dump(fittest_male, male_file)
 
-            fittest_female_file_name = os.path.join('model', fittest_female_file_name)
+            if fittest_female.fitness > current_fitness_female:
+                fittest_female_file_name = "Female_Evol_"+ str(config.evolution) + "_Gen_" + str(fittest_female.generation) \
+                + "_Fit_" + str(int(fittest_female.fitness)) + ".pickle" 
 
-            with open(fittest_female_file_name, 'wb') as female_file:
-                pickle.dump(fittest_female, female_file)
+                fittest_female_file_name = os.path.join('model', fittest_female_file_name)
 
-                                     
-                    
+                #Delete current model to reduce and complications
+                for model in os.listdir('model'):
+                    if model.startswith('Female'):
+                        os.remove(os.path.join('model', model))
 
+                with open(fittest_female_file_name, 'wb') as female_file:
+                    pickle.dump(fittest_female, female_file)
 
-
-        pass                
+                                                     
 
     
     class Brain:
@@ -536,7 +580,7 @@ class Fox(Organism):
         self.max_size_ratio = 1.0
         self.min_size_ratio = 0.6
 
-        self.again_hungry = 150  #zero since training
+        self.again_hungry = 0  #zero since training
         self.max_hunger_limit = 500
 
 
@@ -553,8 +597,8 @@ class Grass:
     # Grass generation every 40 days
     def new_grass_generator():
         
-        if config.days % 40 == 0:
-            new_grass_quantity = random.randint(40, 70)
+        if config.days % 40 == 0 and len(Grass.grass_list) < 80:
+            new_grass_quantity = random.randint(30, 50)
             Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
 
     def grass_populator():

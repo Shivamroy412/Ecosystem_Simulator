@@ -13,6 +13,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 
 days = 0
 hunger_marker = False
+spawn_near_mother = False
 
 evolution = 0
 
@@ -22,6 +23,8 @@ dies_of_hunger_score = -30.0
 eat_score = 50.0
 eaten_death_score = -100.0
 mating_score = 100.0
+
+
 population_limit = 80
 
 
@@ -46,7 +49,7 @@ fox_image_right = [pygame.image.load(os.path.join('img', 'fox_walk',
                                 "right_fox" + str(i) +
                                   ".png")) for i in range(1, 6)]
 
-fox_initial_N = 10
+fox_initial_N = 15
 
 # Grass
 grass_image = pygame.image.load(os.path.join("img", "grass.png"))
