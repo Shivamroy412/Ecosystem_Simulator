@@ -265,8 +265,9 @@ class Organism:
                     creature.pos_X = creature.mother.pos_X 
                     creature.pos_Y = creature.mother.pos_Y
                 
-            creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
-            creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
+            if not isinstance(creature, Grass):
+                creature.id = "_".join(["Evol", str(config.evolution), "Num", str(creature_class.number_of_creatures)])
+                creature_class.number_of_creatures += 1 #Keeps a count of the number of creatures    
                     
             creature_population.append(creature)
 
