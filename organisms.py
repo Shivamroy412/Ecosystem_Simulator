@@ -55,7 +55,6 @@ class Organism:
         self.fitness = 0.0
 
     
-
     #Gradually increaes size of creature with age
     @property
     def size_ratio(self):
@@ -76,7 +75,7 @@ class Organism:
     #The below parameter trait is alreay assigned on birth,however this should be considered as a 
     #mutation as it is random, The creature has a (1-mutation_chance)/2% chance of inheriting this 
     #trait from either parents and (mutation_chance)% through mutation
-    def inheritance(self, trait = "brain", mutation_chance = 0.1):
+    def inheritance(self, trait = "brain", mutation_chance = config.mutation_chance):
 
         parent_chance = (1.0-mutation_chance)/2.0
 
@@ -198,12 +197,12 @@ class Organism:
                 if distance_formula == "Euclidean":
                     distance = math.sqrt((self.pos_X - object2.pos_X) ** 2 + (
                             self.pos_Y - object2.pos_Y) ** 2)
-                    if 40 > distance > 0:
+                    if 60 > distance > 0:
                         return object2
                 
                 if distance_formula == "Manhattan":       #Reduces computational overhead
                     distance = abs(self.pos_X - object2.pos_X) + abs(self.pos_Y - object2.pos_Y)
-                    if 40 > distance > 0:
+                    if 60 > distance > 0:
                         return object2
 
 
@@ -248,12 +247,12 @@ class Organism:
                 creature.generation = max(creature.mother.generation, creature.father.generation) + 1
 
                 #Since trait is an attribute it has to be passed as a string
-                creature.speed = creature.inheritance("speed", 0.1)
-                creature.life_span = creature.inheritance("life_span", 0.1)
+                creature.speed = creature.inheritance("speed")
+                creature.life_span = creature.inheritance("life_span")
 
                 #Inherting neural network weights and biases, "brain" argument would return None
                 if creature.isIntelligent:
-                    creature.inheritance("brain", 0.1)
+                    creature.inheritance("brain")
 
                     # Debugging
                     # print(creature.brain.bias_2.sum(), creature.mother.brain.bias_2.sum(),  
@@ -296,14 +295,11 @@ class Organism:
 
                 # Age counter
                 creature.age += 1
+                creature.fitness += config.age_score
 
                 # Hunger Counter
                 creature.hunger += 1
                 if creature.hunger >= creature.max_hunger_limit:
-                    
-                    creature.fitness += config.dies_of_hunger_score
-                    #Crearure couldn't find food, however there might be shortage of food, hence not
-                    # the heaviest penalty
 
                     creature.death(population_list, "Hunger")
                     continue #Continue to the next element after death, since 
@@ -321,8 +317,14 @@ class Organism:
 
                         if not isinstance(eaten, Grass):
                             eaten.fitness = config.eaten_death_score #Got eaten
+                        else:
+                            cls.death(eaten, food_list, "Eaten")
 
-                        cls.death(eaten, food_list, "Eaten")
+                        if not config.training:
+                            cls.death(eaten, food_list, "Eaten")
+                            #Removing the creature from the environment on being slows down training
+
+
                         continue 
                         #Calling death() as a classmethod and passing the instance since 
                         #Grass class does not have a death() method
@@ -391,7 +393,7 @@ class Organism:
 
         else:
             print("Error: model folder should only have 2 files")
-            return 0, 0  
+            return -1000, -1000  
     
     
     @staticmethod
@@ -598,7 +600,7 @@ class Grass:
     # Grass generation every 40 days
     def new_grass_generator():
         
-        if config.days % 40 == 0 and len(Grass.grass_list) < 80:
+        if config.days % 40 == 0 and len(Grass.grass_list) < 100:
             new_grass_quantity = random.randint(30, 50)
             Organism.birth(Grass, new_grass_quantity, Grass.grass_list)
 

@@ -4,8 +4,6 @@ import game
 import map
 import statistics
 from organisms import *
-import numpy as np
-
 
 # Initialize pygame
 pygame.init()
@@ -21,7 +19,8 @@ while config.game_running:
     game.screen.blit(game.universe_screen, (map.x_pos_map,map.y_pos_map))
     #game.handle_events() Disabled 
     map.Map.render_map()
-    population_label = label_font.render(f"Present Rabbit Population: {len(Rabbit.rabbit_list)}", 1, (0,0,0))
+    population_label = label_font.render(f"Evolution: {config.evolution} \
+        Present Rabbit Population: {len(Rabbit.rabbit_list)}", 1, (0,0,0))
     game.screen.blit(population_label, (10, 10))
 
     #Present Universe State

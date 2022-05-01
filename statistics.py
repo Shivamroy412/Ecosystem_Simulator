@@ -1,6 +1,6 @@
 from organisms import *
 
-# Stats
+# Statistics
 def print_stats():
     for rabbit in Rabbit.rabbit_list:
         print(rabbit.id, rabbit.age, rabbit.steps,

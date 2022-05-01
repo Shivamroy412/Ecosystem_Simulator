@@ -7,7 +7,7 @@ game_running = True
 
 #Change initial_training to True if you change the neural network architecture
 #or if you wish to start training from scratch and not leverage pre-trained weights
-initial_training = False 
+training = True 
 
 SCREEN_WIDTH, SCREEN_HEIGHT =  1280, 768
 
@@ -15,20 +15,20 @@ days = 0
 hunger_marker = False
 spawn_near_mother = False
 
+mutation_chance = 0.3
+
 evolution = 0
+
 
 #Fitness scores
 edge_score = -1.0
-dies_of_hunger_score = -30.0
-eat_score = 50.0
-eaten_death_score = -100.0
-mating_score = 100.0
-
+eat_score = 10.0
+eaten_death_score = -40.0
+mating_score = 40.0
+age_score = -3.0 #For normalising with newer generations, since the older creatures 
+                 # would have survived longer and hence would have  higher scores
 
 population_limit = 80
-
-
-
 
 # Rabbit
 rabbit_image_left = [pygame.image.load(os.path.join('img', 'rabbit_walk',
