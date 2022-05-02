@@ -25,7 +25,7 @@ edge_score = -1.0
 eat_score = 10.0
 eaten_death_score = -40.0
 mating_score = 40.0
-age_score = -3.0 #For normalising with newer generations, since the older creatures 
+age_score = -0.25 #For normalising with newer generations, since the older creatures 
                  # would have survived longer and hence would have  higher scores
 
 population_limit = 80

@@ -409,10 +409,11 @@ class Organism:
 
                 if isinstance(creature, creature_class):
 
-                    if creature.gender == 'M' and creature.fitness > fittest_male.fitness:
+                    if creature.gender == 'M' and creature.fitness > fittest_male.fitness + 1:
+                        # +1 since creature.fitness is converted from decimal to int and rounds up
                         fittest_male = creature
 
-                    if creature.gender == 'F' and creature.fitness > fittest_female.fitness:
+                    if creature.gender == 'F' and creature.fitness > fittest_female.fitness + 1:
                         fittest_female = creature
 
             #Loads current saved fitness' of the creatures
