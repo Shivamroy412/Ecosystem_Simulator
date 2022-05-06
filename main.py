@@ -86,6 +86,6 @@ while config.game_running:
             config.game_running = False
             statistics.print_stats()
 
-    time.sleep(0.001)
+    time.sleep(0.0001)
 
     pygame.display.update()
